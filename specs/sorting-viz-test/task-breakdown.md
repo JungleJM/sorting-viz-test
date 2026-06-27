@@ -15,8 +15,8 @@ in `index.html`; tests and proof files may be separate.
 | N | Task | Branch | Tests to perform | Proof | Auto-merge eligible |
 |---|------|--------|------------------|-------|---------------------|
 | 000 | Codex spec breakdown | `task/sorting-viz-test-000-spec-breakdown` | Human review of this spec package | markdown review | no |
-| 001 | Scaffold single-file app and test harness | `task/sorting-viz-test-001-scaffold` | Static contract check for required DOM controls and no external app files | command output + screenshot | yes |
-| 002 | Array generation and animated bar rendering | `task/sorting-viz-test-002-array-rendering` | Static/browser check for 10/200 sizes, bar count, reset behavior | screenshot + command output | yes |
+| 001 | Create lightweight test harness | `task/sorting-viz-test-001-scaffold` | Python compile check for harness scripts | command output | yes |
+| 002 | Scaffold app layout, controls, and array rendering | `task/sorting-viz-test-002-array-rendering` | Static/browser check for required controls, 10/200 sizes, bar count, reset behavior | screenshot + command output | yes |
 | 003 | Animation controller, speed, start/pause, elapsed time | `task/sorting-viz-test-003-animation-controls` | Browser check for start, pause, resume, speed slider, elapsed stat | short recording or screenshot sequence | yes |
 | 004 | Bubble, insertion, and selection sort step generators | `task/sorting-viz-test-004-simple-sorts` | Unit/browser checks that three algorithms sort fixed arrays and update comparisons/swaps | command output | yes |
 | 005 | Merge, quick, and heap sort step generators | `task/sorting-viz-test-005-advanced-sorts` | Unit/browser checks that three algorithms sort fixed arrays and update comparisons/swaps | command output | yes |
@@ -41,10 +41,26 @@ Tests to perform:
 - Human review of the markdown and YAML.
 - Confirm Bluefin paths and branch names match the renamed repo.
 
-### 001 Scaffold single-file app and test harness
+### 001 Create lightweight test harness
 
-Goal: create a clean `index.html` shell with the full visual layout, control
-surface, placeholder array area, and lightweight evaluation tests.
+Goal: create lightweight Python test harness files under `tests/` before asking
+local workers to build the app UI.
+
+Acceptance criteria:
+
+- `tests/static_contract_check.py` exists and is valid Python.
+- `tests/algorithm_contract_check.py` exists and is valid Python.
+- Test scripts use clear assertion messages suitable for local-LLM review.
+- Test scripts do not move app code out of `index.html`.
+
+Tests to perform:
+
+- `python3 -m py_compile tests/static_contract_check.py tests/algorithm_contract_check.py`
+
+### 002 Scaffold app layout, controls, and array rendering
+
+Goal: create `index.html` with the full visual layout, controls, stats panel,
+and randomized bar rendering.
 
 Acceptance criteria:
 
@@ -53,21 +69,6 @@ Acceptance criteria:
 - The page contains speed and array-size sliders, Shuffle & Reset, Start/Pause,
   and the stats panel.
 - The visual style is dark, modern, and not a bare unstyled prototype.
-- Test harness files exist under `tests/` and do not split app code out of
-  `index.html`.
-
-Tests to perform:
-
-- `python3 tests/static_contract_check.py`
-- Open `index.html` directly and capture a screenshot.
-
-### 002 Array generation and animated bar rendering
-
-Goal: implement randomized array generation and render bars with stable,
-responsive dimensions.
-
-Acceptance criteria:
-
 - Array-size slider supports 10 through 200.
 - Shuffle & Reset regenerates values and resets visual state.
 - Bar count matches the selected array size.

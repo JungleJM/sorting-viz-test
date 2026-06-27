@@ -14,41 +14,48 @@ planner:
     the failed HantaSim attempt and include explicit tests for local-LLM review.
 tasks:
   - task_id: sorting-viz-test-001-scaffold
-    title: Scaffold single-file app and test harness
+    title: Create lightweight test harness
     repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/sorting-viz-test
     branch_name: task/sorting-viz-test-001-scaffold
     goal: >
-      Create index.html with the full visual layout, algorithm controls,
-      sliders, stats panel, placeholder visualization area, and lightweight
-      test harness files under tests/.
+      Create lightweight Python test harness files under tests/ for later tasks.
+      Do not create app UI in this task. The static check should inspect
+      index.html when it exists and report clear failures when required controls
+      are missing. The algorithm check should accept mode flags used by later
+      tasks and report clear failures until those features exist.
     allowed_paths: &app_paths
       - index.html
       - tests/**
       - specs/sorting-viz-test/**
     acceptance_criteria:
-      - index.html opens directly in a browser without a build step.
-      - The page has buttons for Bubble, Insertion, Selection, Merge, Quick, and Heap sort.
-      - The page has speed and array-size sliders, Shuffle & Reset, Start/Pause, and stats fields.
-      - The visual style is dark, modern, and not a bare unstyled prototype.
-      - Test harness files exist under tests/ without moving app code out of index.html.
-    checks: &static_checks
-      - python3 tests/static_contract_check.py
+      - tests/static_contract_check.py exists and is valid Python.
+      - tests/algorithm_contract_check.py exists and is valid Python.
+      - Test scripts use clear assertion messages suitable for local-LLM review.
+      - Test scripts do not move app code out of index.html.
+    checks:
+      - python3 -m py_compile tests/static_contract_check.py tests/algorithm_contract_check.py
     max_attempts: 3
     human_review_required: true
     risk_flags: [no_auto_merge]
     mock_behavior: pass
 
   - task_id: sorting-viz-test-002-array-rendering
-    title: Array generation and animated bar rendering
+    title: Scaffold app layout, controls, and array rendering
     repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/sorting-viz-test
     branch_name: task/sorting-viz-test-002-array-rendering
     goal: >
-      Implement randomized array generation and render animated bars whose
-      count and heights reflect the selected array size and values.
+      Create index.html with the visual layout, six algorithm buttons, speed
+      and array-size sliders, Shuffle & Reset, Start/Pause, stats panel, and
+      randomized bar rendering whose count and heights reflect selected size
+      and values.
     allowed_paths: *app_paths
     acceptance_criteria:
+      - index.html opens directly in a browser without a build step.
+      - The page has buttons for Bubble, Insertion, Selection, Merge, Quick, and Heap sort.
+      - The page has speed and array-size sliders, Shuffle & Reset, Start/Pause, and stats fields.
+      - The visual style is dark, modern, and not a bare unstyled prototype.
       - Array-size slider supports 10 through 200.
       - Shuffle & Reset regenerates values and resets visual state.
       - Bar count matches the selected array size.

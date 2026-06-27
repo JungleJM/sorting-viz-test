@@ -2,6 +2,11 @@
 
 ## Open issues
 
+- Initial production attempts showed task 001 was still too large for the
+  local implementers: Devstral and Qwen repeatedly produced only `index.html`
+  and omitted `tests/static_contract_check.py`, so deterministic review
+  correctly blocked merge to `feature/sorting-viz-test`. The plan was re-split
+  so task 001 creates only the test harness and task 002 creates the app shell.
 - Structured JSON reliability is still a risk for the GLM reviewer workers.
   On 2026-06-27, both Denbuntu and jmapple were reachable from Bluefin and
   could call local LM Studio, but tiny checker probes still returned malformed
