@@ -7,6 +7,9 @@
   could call local LM Studio, but tiny checker probes still returned malformed
   or empty JSON after model generation. This is a control-plane response issue,
   not a branch/diff handoff issue.
+- Loop Manager now has an adapter-level JSON repair layer and larger GLM token
+  budgets, but Denbuntu and jmapple GLM still failed the tiny checker JSON
+  probe. Oracle Devstral passed the same checker probe with valid JSON.
 - Worker-side branch checkout/edit/review support was added to Loop Manager,
   and worker Git access was proven for clone/review and Oracle task-branch
   push. The first managed-loop branch checkout canary still needs to run
