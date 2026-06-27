@@ -7,6 +7,11 @@
   and omitted `tests/static_contract_check.py`, so deterministic review
   correctly blocked merge to `feature/sorting-viz-test`. The plan was re-split
   so task 001 creates only the test harness and task 002 creates the app shell.
+- After re-splitting, task 001 passed and merged, but its generated harness was
+  too brittle for task 002: it expected exact strings and a select-based UI even
+  though the spec calls for algorithm buttons. Codex manually merged the
+  worker's task-002 branch into `feature/sorting-viz-test` and corrected the
+  harness to semantic checks at feature commit `468e853`.
 - Structured JSON reliability is still a risk for the GLM reviewer workers.
   On 2026-06-27, both Denbuntu and jmapple were reachable from Bluefin and
   could call local LM Studio, but tiny checker probes still returned malformed
