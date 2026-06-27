@@ -1,0 +1,178 @@
+plan_id: sorting-viz-test
+title: Sorting visualization single-file browser app
+repo_url: /var/home/j/code/sorting-viz-test
+base_branch: feature/sorting-viz-test
+summary: >
+  Build a polished, self-contained index.html sorting algorithm visualizer with
+  six algorithms, animated bars, controls, live stats, and evaluation tests.
+planner:
+  provider: codex
+  model: frontier
+  machine: jmapple
+  notes: >
+    Drafted from sorting-visualization.md. Tasks are intentionally smaller than
+    the failed HantaSim attempt and include explicit tests for local-LLM review.
+tasks:
+  - task_id: sorting-viz-test-001-scaffold
+    title: Scaffold single-file app and test harness
+    repo_url: /var/home/j/code/sorting-viz-test
+    base_branch: feature/sorting-viz-test
+    branch_name: task/sorting-viz-test-001-scaffold
+    goal: >
+      Create index.html with the full visual layout, algorithm controls,
+      sliders, stats panel, placeholder visualization area, and lightweight
+      test harness files under tests/.
+    allowed_paths: &app_paths
+      - index.html
+      - tests/**
+      - specs/sorting-viz-test/**
+    acceptance_criteria:
+      - index.html opens directly in a browser without a build step.
+      - The page has buttons for Bubble, Insertion, Selection, Merge, Quick, and Heap sort.
+      - The page has speed and array-size sliders, Shuffle & Reset, Start/Pause, and stats fields.
+      - The visual style is dark, modern, and not a bare unstyled prototype.
+      - Test harness files exist under tests/ without moving app code out of index.html.
+    checks: &static_checks
+      - python3 tests/static_contract_check.py
+    max_attempts: 3
+    human_review_required: true
+    risk_flags: [no_auto_merge]
+    mock_behavior: pass
+
+  - task_id: sorting-viz-test-002-array-rendering
+    title: Array generation and animated bar rendering
+    repo_url: /var/home/j/code/sorting-viz-test
+    base_branch: feature/sorting-viz-test
+    branch_name: task/sorting-viz-test-002-array-rendering
+    goal: >
+      Implement randomized array generation and render animated bars whose
+      count and heights reflect the selected array size and values.
+    allowed_paths: *app_paths
+    acceptance_criteria:
+      - Array-size slider supports 10 through 200.
+      - Shuffle & Reset regenerates values and resets visual state.
+      - Bar count matches the selected array size.
+      - Bars use a default unsorted color and animate value/height changes smoothly.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/algorithm_contract_check.py --rendering
+    max_attempts: 3
+    human_review_required: true
+    risk_flags: [no_auto_merge]
+    mock_behavior: pass
+
+  - task_id: sorting-viz-test-003-animation-controls
+    title: Animation controller, speed, start/pause, elapsed time
+    repo_url: /var/home/j/code/sorting-viz-test
+    base_branch: feature/sorting-viz-test
+    branch_name: task/sorting-viz-test-003-animation-controls
+    goal: >
+      Implement the animation loop, start/pause/resume behavior, speed control,
+      and elapsed-time tracking needed by all sorting algorithms.
+    allowed_paths: *app_paths
+    acceptance_criteria:
+      - Start begins playback for the selected algorithm.
+      - Pause stops progress without resetting.
+      - Resume continues from the same step.
+      - Speed slider changes delay between steps.
+      - Elapsed time updates while running and stops when paused or completed.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/algorithm_contract_check.py --controls
+    max_attempts: 3
+    human_review_required: true
+    risk_flags: [no_auto_merge]
+    mock_behavior: pass
+
+  - task_id: sorting-viz-test-004-simple-sorts
+    title: Bubble, insertion, and selection sort step generators
+    repo_url: /var/home/j/code/sorting-viz-test
+    base_branch: feature/sorting-viz-test
+    branch_name: task/sorting-viz-test-004-simple-sorts
+    goal: >
+      Implement instrumented step generators for Bubble Sort, Insertion Sort,
+      and Selection Sort with comparisons, swaps/writes, active highlights, and
+      sorted-state hints.
+    allowed_paths: *app_paths
+    acceptance_criteria:
+      - Bubble Sort, Insertion Sort, and Selection Sort produce sorted output.
+      - Comparisons increment for meaningful element comparisons.
+      - Swaps/writes increment when values are moved.
+      - The currently compared bars are highlighted during playback.
+      - Completed regions are marked sorted where the algorithm can know that.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/algorithm_contract_check.py --algorithms bubble,insertion,selection
+    max_attempts: 3
+    human_review_required: true
+    risk_flags: [no_auto_merge]
+    mock_behavior: pass
+
+  - task_id: sorting-viz-test-005-advanced-sorts
+    title: Merge, quick, and heap sort step generators
+    repo_url: /var/home/j/code/sorting-viz-test
+    base_branch: feature/sorting-viz-test
+    branch_name: task/sorting-viz-test-005-advanced-sorts
+    goal: >
+      Implement instrumented step generators for Merge Sort, Quick Sort, and
+      Heap Sort without destabilizing the renderer or controls.
+    allowed_paths: *app_paths
+    acceptance_criteria:
+      - Merge Sort, Quick Sort, and Heap Sort produce sorted output.
+      - Comparisons and swaps/writes update during each algorithm.
+      - Active comparisons and writes are highlighted.
+      - Each algorithm completes without freezing at array size 200.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/algorithm_contract_check.py --algorithms merge,quick,heap
+    max_attempts: 3
+    human_review_required: true
+    risk_flags: [no_auto_merge]
+    mock_behavior: pass
+
+  - task_id: sorting-viz-test-006-stats-completion
+    title: Live stats, sorted highlighting, and completion states
+    repo_url: /var/home/j/code/sorting-viz-test
+    base_branch: feature/sorting-viz-test
+    branch_name: task/sorting-viz-test-006-stats-completion
+    goal: >
+      Finish live stats behavior, completion handling, sorted colors, and safe
+      control-state transitions between runs.
+    allowed_paths: *app_paths
+    acceptance_criteria:
+      - Stats panel always shows selected algorithm name.
+      - Comparisons, swaps/writes, and elapsed time update live.
+      - On completion, all bars are marked sorted.
+      - Starting a new algorithm resets stats cleanly.
+      - Controls cannot corrupt state mid-sort.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/algorithm_contract_check.py --stats
+    max_attempts: 3
+    human_review_required: true
+    risk_flags: [no_auto_merge]
+    mock_behavior: pass
+
+  - task_id: sorting-viz-test-007-polish-hardening
+    title: Final UI polish, responsiveness, and cross-browser smoke
+    repo_url: /var/home/j/code/sorting-viz-test
+    base_branch: feature/sorting-viz-test
+    branch_name: task/sorting-viz-test-007-polish-hardening
+    goal: >
+      Polish the visual design, responsiveness, accessibility basics, and
+      direct-open browser behavior; record any remaining issues.
+    allowed_paths: *app_paths
+    acceptance_criteria:
+      - Layout is readable and polished on common desktop widths.
+      - Controls do not overlap or resize awkwardly.
+      - Text is plain and understandable.
+      - Color contrast makes default, comparing, and sorted states obvious.
+      - All feature acceptance criteria pass.
+      - Known issues are recorded in specs/sorting-viz-test/issue-log.md.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/algorithm_contract_check.py --all
+    max_attempts: 3
+    human_review_required: true
+    risk_flags: [no_auto_merge]
+    mock_behavior: pass
