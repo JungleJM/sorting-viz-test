@@ -1,5 +1,5 @@
-project_id: hantasim-test
-repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/hantasim-test.git
+project_id: sorting-viz-test
+repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
 default_branch: main
 
 specs_dir: specs
@@ -12,8 +12,15 @@ proof_required: true
 
 allowed_runtime:
   manager_node: bluefin
-  developer_node: default
-  code_review_node: default
+  developer_node: oracle
+  code_review_node: denbuntu
+  code_review_fallback_node: jmapple
   local_pr_agent_node: default
   codex_pr_agent_node: default
   preview_node: bluefin
+
+branch_handoff:
+  required: true
+  worker_checkout_required: true
+  push_before_worker: true
+  worker_repo_url_env: LOOP_MANAGER_WORKER_REPO_URL

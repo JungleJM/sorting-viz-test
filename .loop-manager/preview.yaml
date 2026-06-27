@@ -1,15 +1,15 @@
 preview:
-  kind: native-desktop
-  install: "cargo fetch"
-  build: "cargo build"
-  serve: "cargo run"
-  port: null
-  public_base_url: ""
+  kind: web-static
+  install: ""
+  build: ""
+  serve: "python3 -m http.server 4173"
+  port: 4173
+  public_base_url: "http://bluefin.tail90eacc.ts.net:4173"
 
 proof:
   required: true
   preferred:
-    - asciinema
     - screenshot
     - short-screen-recording
+    - playwright
   not_applicable_requires_reason: true

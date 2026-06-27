@@ -1,18 +1,16 @@
 checks:
-  install: "cargo fetch"
-  lint: "cargo fmt --all -- --check && cargo clippy --all-targets -- -D warnings"
-  typecheck: "cargo check --all-targets"
-  test: "cargo test --all-targets"
-  build: "cargo build"
+  install: ""
+  lint: "python3 tests/static_contract_check.py"
+  typecheck: ""
+  test: "python3 tests/algorithm_contract_check.py --all"
+  build: "python3 tests/static_contract_check.py && python3 tests/algorithm_contract_check.py --all"
 
 required_for_task_pr:
   - lint
-  - typecheck
   - test
   - build
 
 required_for_feature_review:
   - lint
-  - typecheck
   - test
   - build
