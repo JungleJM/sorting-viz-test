@@ -8,8 +8,9 @@
   or empty JSON after model generation. This is a control-plane response issue,
   not a branch/diff handoff issue.
 - Worker-side branch checkout/edit/review support was added to Loop Manager,
-  but the first live branch checkout canary still needs to prove worker Git
-  credentials can clone and, for implementers, push task branches.
+  and worker Git access was proven for clone/review and Oracle task-branch
+  push. The first managed-loop branch checkout canary still needs to run
+  through Loop Manager itself.
 
 ## Resolved or mitigated issues
 
@@ -25,6 +26,9 @@
 - Loop Manager commit `f51e16e` added remote worker branch checkout support so
   workers can operate on task branches instead of treating copied snippets or
   diffs as the handoff.
+- jmapple, Denbuntu, and Oracle can clone `feature/sorting-viz-test`.
+- Oracle can push and delete a canary task branch over HTTPS using its local
+  token-backed `.netrc`.
 
 ## Log entries
 

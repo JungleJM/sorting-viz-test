@@ -38,6 +38,9 @@ feature/sorting-viz-test
 - Both report `zai-org/glm-4.7-flash` as locally installed, not only
   LM Link-advertised.
 - Structured JSON response reliability remains unproven for GLM reviewer calls.
+- jmapple, Denbuntu, and Oracle successfully cloned `feature/sorting-viz-test`.
+- Oracle successfully pushed and deleted `task/credential-canary`, proving the
+  implementer can update task branches.
 
 ## Runtime mode
 
