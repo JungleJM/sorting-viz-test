@@ -1,31 +1,32 @@
 #!/usr/bin/env python3
-
+import os
 import sys
 import json
-from pathlib import Path
 
-def check_bubble_sort():
-    """Verify bubbleSort function exists and has correct signature."""
-    try:
-        with open('index.html', 'r') as f:
-            content = f.read()
+def check_algorithm_contract():
+    required_functions = [
+        "generateArray",
+        "bubbleSort",
+        "quickSort",
+        "mergeSort"
+    ]
 
-        if 'function bubbleSort()' not in content:
-            print("ERROR: Required sorting function 'bubbleSort()' not found.")
-            return False
+    algorithm_file = "specs/sorting-viz-test/algorithm.js"
 
-        return True
-    except Exception as e:
-        print(f"ERROR: Failed to check bubble sort implementation: {e}")
+    if not os.path.exists(algorithm_file):
+        print(f"ERROR: Algorithm file '{algorithm_file}' is missing.")
         return False
 
-def main():
-    if '--stats' in sys.argv:
-        if not check_bubble_sort():
-            sys.exit(1)
-        print("All algorithm contract checks passed.")
-    else:
-        print("Algorithm contract checks completed.")
+    with open(algorithm_file, 'r') as f:
+        content = f.read()
+
+    for func in required_functions:
+        if func not in content:
+            print(f"ERROR: Required function '{func}' is missing in algorithm.js.")
+            return False
+
+    print("Algorithm contract check passed.")
+    return True
 
 if __name__ == "__main__":
-    main()
+    sys.exit(0 if check_algorithm_contract() else 1)
