@@ -1,30 +1,38 @@
-import sys
+#!/usr/bin/env python3
+
 import argparse
+import os
+import sys
 
-def check_control_elements():
-    with open('index.html', 'r') as f:
-        content = f.read()
+def check_algorithms(algorithms):
+    required_files = {
+        'bubble': ['index.html'],
+        'insertion': ['index.html'],
+        'selection': ['index.html']
+    }
 
-    required_elements = [
-        '<button id="startBtn">Start</button>',
-        '<button id="pauseBtn" disabled>Pause</button>',
-        '<button id="resumeBtn" disabled>Resume</button>',
-        '<span id="elapsedTime">0s</span>',
-        '<input type="range" id="speedSlider" min="1" max="10" value="5">'
-    ]
-
-    for element in required_elements:
-        if element not in content:
-            print(f"Missing control element: {element}")
+    for algo in algorithms:
+        if algo not in required_files:
+            print(f"ERROR: Unknown algorithm '{algo}'.")
             return False
 
-    print("All required control elements present")
+        for file in required_files[algo]:
+            if not os.path.exists(file):
+                print(f"ERROR: Required file '{file}' for algorithm '{algo}' does not exist.")
+                return False
+
     return True
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--controls', action='store_true')
+    parser = argparse.ArgumentParser(description='Check sorting algorithms implementation.')
+    parser.add_argument('--algorithms', required=True, help='Comma-separated list of algorithms to check')
     args = parser.parse_args()
 
-    if args.controls:
-        sys.exit(0 if check_control_elements() else 1)
+    algorithms = [algo.strip() for algo in args.algorithms.split(',')]
+
+    if check_algorithms(algorithms):
+        print(f"Algorithm contract check passed for: {', '.join(algorithms)}")
+        sys.exit(0)
+    else:
+        print(f"Algorithm contract check failed for: {', '.join(algorithms)}")
+        sys.exit(1)

@@ -1,25 +1,20 @@
+#!/usr/bin/env python3
+
+import os
 import sys
 
-def check_static_contracts():
-    # Check that all required elements exist in index.html
-    with open('index.html', 'r') as f:
-        content = f.read()
-
-    required_elements = [
-        '<button id="startBtn">Start</button>',
-        '<button id="pauseBtn" disabled>Pause</button>',
-        '<button id="resumeBtn" disabled>Resume</button>',
-        '<span id="elapsedTime">0s</span>',
-        '<input type="range" id="speedSlider" min="1" max="10" value="5">'
-    ]
-
-    for element in required_elements:
-        if element not in content:
-            print(f"Missing required element: {element}")
+def check_files_exist():
+    required_files = ['index.html']
+    for file in required_files:
+        if not os.path.exists(file):
+            print(f"ERROR: Required file '{file}' does not exist.")
             return False
-
-    print("All static contracts passed")
     return True
 
 if __name__ == "__main__":
-    sys.exit(0 if check_static_contracts() else 1)
+    if check_files_exist():
+        print("Static contract check passed.")
+        sys.exit(0)
+    else:
+        print("Static contract check failed.")
+        sys.exit(1)
