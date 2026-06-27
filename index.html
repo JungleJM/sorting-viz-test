@@ -3,145 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorting Visualization</title>
+    <title>Sorting Visualization Test</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            align-items: center;
-        }
-        button {
-            padding: 8px 16px;
-            cursor: pointer;
-        }
-        input[type="range"] {
-            width: 200px;
-        }
-        .array-container {
-            display: flex;
-            gap: 5px;
-            margin-top: 20px;
-        }
-        .bar {
-            height: 50px;
-            width: 30px;
-            background-color: steelblue;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { display: flex; gap: 20px; }
+        .visualization { width: 70%; border: 1px solid #ccc; padding: 10px; }
+        .controls { width: 30%; }
+        button { margin: 5px 0; padding: 8px 12px; cursor: pointer; }
+        .bar { display: inline-block; width: 20px; height: 50px; background-color: steelblue; margin: 0 2px; }
     </style>
 </head>
 <body>
-    <h1>Sorting Visualization</h1>
-    <div class="controls">
-        <button id="startBtn">Start</button>
-        <button id="pauseBtn" disabled>Pause</button>
-        <button id="resumeBtn" disabled>Resume</button>
-        <span id="elapsedTime">0s</span>
-        <label for="speedSlider">Speed:</label>
-        <input type="range" id="speedSlider" min="1" max="10" value="5">
+    <h1>Sorting Visualization Test</h1>
+    <div class="container">
+        <div class="visualization" id="viz"></div>
+        <div class="controls">
+            <button onclick="runBubbleSort()">Run Bubble Sort</button>
+            <button onclick="runInsertionSort()">Run Insertion Sort</button>
+            <button onclick="runSelectionSort()">Run Selection Sort</button>
+            <div id="stats">
+                Comparisons: <span id="comparisons">0</span><br>
+                Swaps/Writes: <span id="swaps">0</span>
+            </div>
+        </div>
     </div>
-    <div class="array-container" id="arrayContainer"></div>
 
     <script>
-        let array = [];
-        let isRunning = false;
-        let isPaused = true;
-        let currentStep = 0;
-        let elapsedTime = 0;
-        let speed = 5;
-        let animationId = null;
+        let data = [5, 3, 8, 4, 2];
+        let comparisons = 0;
+        let swaps = 0;
 
-        function initializeArray() {
-            array = Array.from({length: 20}, () => Math.floor(Math.random() * 100) + 1);
-            renderArray();
-        }
-
-        function renderArray() {
-            const container = document.getElementById('arrayContainer');
-            container.innerHTML = '';
-            array.forEach(value => {
+        function renderBars() {
+            const viz = document.getElementById('viz');
+            viz.innerHTML = '';
+            data.forEach(value => {
                 const bar = document.createElement('div');
                 bar.className = 'bar';
-                bar.style.height = `${value * 2}px`;
-                container.appendChild(bar);
+                bar.style.height = `${value * 10}px`;
+                bar.textContent = value;
+                viz.appendChild(bar);
             });
         }
 
-        function startAnimation() {
-            if (isRunning && !isPaused) return;
-            isRunning = true;
-            isPaused = false;
-            document.getElementById('startBtn').disabled = true;
-            document.getElementById('pauseBtn').disabled = false;
+        function incrementComparisons() { comparisons++; document.getElementById('comparisons').textContent = comparisons; }
+        function incrementSwaps() { swaps++; document.getElementById('swaps').textContent = swaps; }
 
-            animationId = setInterval(() => {
-                if (!isPaused) {
-                    // Simulate sorting step
-                    currentStep++;
-                    elapsedTime += 100; // Increment by 100ms
-
-                    // Update elapsed time display
-                    document.getElementById('elapsedTime').textContent =
-                        `${(elapsedTime / 1000).toFixed(1)}s`;
-
-                    // Simple bubble sort step for visualization
-                    for (let i = 0; i < array.length - 1; i++) {
-                        if (array[i] > array[i + 1]) {
-                            [array[i], array[i + 1]] = [array[i + 1], array[i]];
-                            renderArray();
-                            break;
-                        }
+        async function runBubbleSort() {
+            resetStats();
+            for (let i = 0; i < data.length - 1; i++) {
+                for (let j = 0; j < data.length - i - 1; j++) {
+                    incrementComparisons();
+                    if (data[j] > data[j + 1]) {
+                        [data[j], data[j + 1]] = [data[j + 1], data[j]];
+                        incrementSwaps();
                     }
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    renderBars();
+                }
+            }
+        }
 
-                    // Check if sorting is complete
-                    if (isSorted()) {
-                        clearInterval(animationId);
-                        isRunning = false;
-                        document.getElementById('startBtn').disabled = false;
-                        document.getElementById('pauseBtn').disabled = true;
-                        document.getElementById('resumeBtn').disabled = true;
+        async function runInsertionSort() {
+            resetStats();
+            for (let i = 1; i < data.length; i++) {
+                let j = i;
+                while (j > 0 && data[j] < data[j - 1]) {
+                    incrementComparisons();
+                    [data[j], data[j - 1]] = [data[j - 1], data[j]];
+                    incrementSwaps();
+                    j--;
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    renderBars();
+                }
+            }
+        }
+
+        async function runSelectionSort() {
+            resetStats();
+            for (let i = 0; i < data.length - 1; i++) {
+                let minIndex = i;
+                for (let j = i + 1; j < data.length; j++) {
+                    incrementComparisons();
+                    if (data[j] < data[minIndex]) {
+                        minIndex = j;
                     }
                 }
-            }, 1000 / speed);
-        }
-
-        function pauseAnimation() {
-            isPaused = true;
-            document.getElementById('pauseBtn').disabled = true;
-            document.getElementById('resumeBtn').disabled = false;
-        }
-
-        function resumeAnimation() {
-            isPaused = false;
-            document.getElementById('resumeBtn').disabled = true;
-            document.getElementById('pauseBtn').disabled = false;
-        }
-
-        function updateSpeed() {
-            speed = parseInt(document.getElementById('speedSlider').value);
-            if (animationId) {
-                clearInterval(animationId);
-                startAnimation();
+                if (minIndex !== i) {
+                    [data[i], data[minIndex]] = [data[minIndex], data[i]];
+                    incrementSwaps();
+                }
+                await new Promise(resolve => setTimeout(resolve, 500));
+                renderBars();
             }
         }
 
-        function isSorted() {
-            for (let i = 0; i < array.length - 1; i++) {
-                if (array[i] > array[i + 1]) return false;
-            }
-            return true;
-        }
+        function resetStats() { comparisons = 0; swaps = 0; document.getElementById('comparisons').textContent = '0'; document.getElementById('swaps').textContent = '0'; }
 
-        document.getElementById('startBtn').addEventListener('click', startAnimation);
-        document.getElementById('pauseBtn').addEventListener('click', pauseAnimation);
-        document.getElementById('resumeBtn').addEventListener('click', resumeAnimation);
-        document.getElementById('speedSlider').addEventListener('input', updateSpeed);
-
-        initializeArray();
+        window.onload = renderBars;
     </script>
 </body>
 </html>
