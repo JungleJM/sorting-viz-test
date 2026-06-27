@@ -1,19 +1,29 @@
-# Issue Log: Sorting Viz Test
+# Sorting Viz Test Issue Log
 
-## Open issues
+## Managed Loop Results
 
-- Initial production attempts showed task 001 was still too large for the
-  local implementers: Devstral and Qwen repeatedly produced only `index.html`
-  and omitted `tests/static_contract_check.py`, so deterministic review
-  correctly blocked merge to `feature/sorting-viz-test`. The plan was re-split
-  so task 001 creates only the test harness and task 002 creates the app shell.
-- After re-splitting, task 001 passed and merged, but its generated harness was
-  too brittle for task 002: it expected exact strings and a select-based UI even
-  though the spec calls for algorithm buttons. Codex manually merged the
-  worker's task-002 branch into `feature/sorting-viz-test` and corrected the
-  harness to semantic checks at feature commit `468e853`.
-- Structured JSON reliability is still a risk for the GLM reviewer workers.
-  On 2026-06-27, both Denbuntu and jmapple were reachable from Bluefin and
+- Initial production attempts showed task 001 was too large for the local
+  implementers: Devstral and Qwen repeatedly produced only `index.html` and
+  omitted `tests/static_contract_check.py`, so deterministic review correctly
+  blocked merge to `feature/sorting-viz-test`.
+- The plan was re-split so task 001 created only the test harness and task 002
+  created the app shell.
+- After re-splitting, task 001 passed and merged into `feature/sorting-viz-test`.
+- Task 002 produced a usable scaffold, but its generated harness was too
+  brittle: it expected exact strings and a select-based UI even though the spec
+  called for algorithm buttons. Codex manually merged the worker's task-002
+  branch into `feature/sorting-viz-test` and corrected the harness to semantic
+  checks at feature commit `468e853`.
+- Tasks 003 through 007 passed local worker review and were merged into
+  `feature/sorting-viz-test`.
+- Task 007 regressed the original single-file requirement by moving runtime
+  code into `specs/sorting-viz-test/algorithm.js` and
+  `specs/sorting-viz-test/visualization.js`.
+
+## Worker Reliability Notes
+
+- Structured JSON reliability is still a risk for GLM reviewer workers.
+- On 2026-06-27, both Denbuntu and jmapple were reachable from Bluefin and
   could call local LM Studio, but tiny checker probes still returned malformed
   or empty JSON after model generation. This is a control-plane response issue,
   not a branch/diff handoff issue.
@@ -22,31 +32,21 @@
   probe. Oracle Devstral passed the same checker probe with valid JSON.
 - Worker-side branch checkout/edit/review support was added to Loop Manager,
   and worker Git access was proven for clone/review and Oracle task-branch
-  push. The first managed-loop branch checkout canary still needs to run
-  through Loop Manager itself.
+  push.
 
-## Resolved or mitigated issues
+## Final Manual Hardening
 
-- The previous HantaSim attempt was archived on branch
-  `failed-attempt-hanta-1` before resetting `main`.
-- The repo was renamed from `hantasim-test` to `sorting-viz-test`.
-- Bluefin-to-jmapple SSH was rechecked and works.
-- The jmapple fallback worker script was installed at
-  `/Users/jmath/ai-workers/bin/lmstudio_worker.py`.
-- Denbuntu came back up and responded to Bluefin SSH and LM Studio `/v1/models`.
-- Both Denbuntu and jmapple report `zai-org/glm-4.7-flash` as locally
-  installed under the local-only guardrail.
-- Loop Manager commit `f51e16e` added remote worker branch checkout support so
-  workers can operate on task branches instead of treating copied snippets or
-  diffs as the handoff.
-- jmapple, Denbuntu, and Oracle can clone `feature/sorting-viz-test`.
-- Oracle can push and delete a canary task branch over HTTPS using its local
-  token-backed `.netrc`.
+- Restored the app to a self-contained `index.html` that can be opened directly
+  in a browser.
+- Removed external runtime JavaScript files from the spec folder.
+- Replaced static and algorithm contract tests so they check the single-file
+  contract, required controls, six sorting algorithms, rendering hooks, and
+  stats hooks.
+- Captured final desktop, running-state, mobile, and short video proof artifacts
+  in `specs/sorting-viz-test/proof/`.
 
-## Log entries
+## Residual Risks
 
-### 2026-06-27
-
-- Created initial sorting-viz spec package for human review.
-- Designed tasks to be smaller than the failed HantaSim attempt.
-- Added explicit test expectations to every implementation task.
+- The UI proof is browser-smoke level, not a full visual regression suite.
+- The app is intentionally small and educational; it does not attempt to
+  benchmark algorithm performance.
