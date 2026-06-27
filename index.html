@@ -5,147 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sorting Visualization Test</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            display: flex;
-            gap: 20px;
-        }
-        .visualization {
-            flex: 3;
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .stats-panel {
-            flex: 1;
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .controls {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        button {
-            padding: 8px 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .bar-container {
-            display: flex;
-            height: 300px;
-            align-items: end;
-            gap: 2px;
-            margin-bottom: 10px;
-        }
-        .bar {
-            width: 8px;
-            background-color: #666;
-            transition: all 0.5s ease;
-        }
-        .sorted {
-            background-color: #4CAF50;
-        }
-        .stats-item {
-            margin-bottom: 10px;
-            padding: 8px;
-            background-color: #f9f9f9;
-            border-radius: 4px;
-        }
-        .algorithm-selector {
-            padding: 8px;
-            font-size: 16px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .controls { margin-bottom: 20px; }
+        button { padding: 8px 16px; margin-right: 10px; cursor: pointer; }
+        #array-container { display: flex; align-items: center; gap: 5px; margin-bottom: 20px; }
+        .bar { width: 30px; height: 50px; background-color: steelblue; display: inline-block; transition: all 0.1s; }
+        .sorted { background-color: green !important; }
+        #stats { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
     </style>
 </head>
 <body>
     <h1>Sorting Visualization Test</h1>
     <div class="controls">
-        <select id="algorithm-selector" class="algorithm-selector">
-            <option value="bubble-sort">Bubble Sort</option>
-            <option value="selection-sort">Selection Sort</option>
-            <option value="insertion-sort">Insertion Sort</option>
-        </select>
-        <button id="start-btn">Start Sorting</button>
+        <button onclick="startSort('bubbleSort')">Bubble Sort</button>
+        <button onclick="startSort('selectionSort')">Selection Sort</button>
+        <button onclick="resetArray()">Reset Array</button>
     </div>
-    <div class="container">
-        <div class="visualization">
-            <h2>Array Visualization</h2>
-            <div class="bar-container" id="bars"></div>
-        </div>
-        <div class="stats-panel">
-            <h2>Stats Panel</h2>
-            <div class="stats-item">Algorithm: <span id="algorithm-name">None</span></div>
-            <div class="stats-item">Comparisons: <span id="comparisons">0</span></div>
-            <div class="stats-item">Swaps/Writes: <span id="swaps-writes">0</span></div>
-            <div class="stats-item">Elapsed Time: <span id="elapsed-time">0 ms</span></div>
-        </div>
+    <div id="array-container"></div>
+    <div id="stats">
+        <p>Algorithm: <span id="algorithm-name">None</span></p>
+        <p>Comparisons: <span id="comparisons">0</span></p>
+        <p>Swaps/Writes: <span id="swaps-writes">0</span></p>
+        <p>Elapsed Time: <span id="elapsed-time">0</span> ms</p>
     </div>
 
     <script>
-        const barsContainer = document.getElementById('bars');
-        const algorithmName = document.getElementById('algorithm-name');
-        const comparisonsCount = document.getElementById('comparisons');
-        const swapsWritesCount = document.getElementById('swaps-writes');
-        const elapsedTime = document.getElementById('elapsed-time');
-        const startBtn = document.getElementById('start-btn');
-        const algorithmSelector = document.getElementById('algorithm-selector');
-
         let array = [];
         let isSorting = false;
         let comparisons = 0;
         let swapsWrites = 0;
-        let startTime = null;
-        let animationTimeout = null;
+        let startTime = 0;
+        let currentAlgorithm = '';
 
         function initializeArray() {
-            barsContainer.innerHTML = '';
-            array = Array.from({length: 50}, () => Math.floor(Math.random() * 100) + 1);
+            array = Array.from({length: 20}, () => Math.floor(Math.random() * 100) + 1);
+            renderArray();
+        }
+
+        function renderArray() {
+            const container = document.getElementById('array-container');
+            container.innerHTML = '';
             array.forEach(value => {
                 const bar = document.createElement('div');
                 bar.className = 'bar';
-                bar.style.height = `${value}px`;
-                barsContainer.appendChild(bar);
+                bar.style.height = `${value * 2}px`;
+                bar.textContent = value;
+                container.appendChild(bar);
             });
         }
 
         function updateStats() {
-            algorithmName.textContent = algorithmSelector.value.replace('-', ' ');
-            comparisonsCount.textContent = comparisons;
-            swapsWritesCount.textContent = swapsWrites;
-            if (startTime) {
-                elapsedTime.textContent = `${Date.now() - startTime} ms`;
-            }
+            document.getElementById('algorithm-name').textContent = currentAlgorithm;
+            document.getElementById('comparisons').textContent = comparisons;
+            document.getElementById('swaps-writes').textContent = swapsWrites;
+            const elapsedTime = Date.now() - startTime;
+            document.getElementById('elapsed-time').textContent = elapsedTime;
         }
 
         function resetStats() {
             comparisons = 0;
             swapsWrites = 0;
-            startTime = null;
+            startTime = Date.now();
             updateStats();
         }
 
         async function bubbleSort() {
             isSorting = true;
+            currentAlgorithm = 'Bubble Sort';
             resetStats();
-            startTime = Date.now();
-            updateStats();
 
             for (let i = 0; i < array.length - 1 && isSorting; i++) {
                 for (let j = 0; j < array.length - i - 1 && isSorting; j++) {
@@ -155,8 +82,8 @@
                     if (array[j] > array[j + 1]) {
                         [array[j], array[j + 1]] = [array[j + 1], array[j]];
                         swapsWrites++;
-                        updateStats();
                         renderArray();
+                        updateStats();
                     }
                 }
             }
@@ -167,12 +94,12 @@
 
         async function selectionSort() {
             isSorting = true;
+            currentAlgorithm = 'Selection Sort';
             resetStats();
-            startTime = Date.now();
-            updateStats();
 
             for (let i = 0; i < array.length - 1 && isSorting; i++) {
                 let minIndex = i;
+
                 for (let j = i + 1; j < array.length && isSorting; j++) {
                     comparisons++;
                     updateStats();
@@ -185,80 +112,38 @@
                 if (minIndex !== i) {
                     [array[i], array[minIndex]] = [array[minIndex], array[i]];
                     swapsWrites++;
-                    updateStats();
                     renderArray();
+                    updateStats();
                 }
             }
 
             markAllSorted();
             isSorting = false;
-        }
-
-        async function insertionSort() {
-            isSorting = true;
-            resetStats();
-            startTime = Date.now();
-            updateStats();
-
-            for (let i = 1; i < array.length && isSorting; i++) {
-                let current = array[i];
-                let j = i - 1;
-
-                while (j >= 0 && array[j] > current && isSorting) {
-                    comparisons++;
-                    updateStats();
-                    await new Promise(resolve => setTimeout(resolve, 50));
-                    array[j + 1] = array[j];
-                    swapsWrites++;
-                    updateStats();
-                    renderArray();
-                    j--;
-                }
-
-                array[j + 1] = current;
-                renderArray();
-            }
-
-            markAllSorted();
-            isSorting = false;
-        }
-
-        function renderArray() {
-            const bars = document.querySelectorAll('.bar');
-            bars.forEach((bar, index) => {
-                bar.style.height = `${array[index]}px`;
-            });
         }
 
         function markAllSorted() {
             const bars = document.querySelectorAll('.bar');
-            bars.forEach(bar => {
-                bar.classList.add('sorted');
-            });
+            bars.forEach(bar => bar.classList.add('sorted'));
         }
 
-        startBtn.addEventListener('click', () => {
+        function startSort(algorithm) {
             if (isSorting) return;
 
-            clearTimeout(animationTimeout);
+            resetArray();
+            if (algorithm === 'bubbleSort') bubbleSort();
+            else selectionSort();
+        }
+
+        function resetArray() {
+            isSorting = false;
+            currentAlgorithm = '';
+            comparisons = 0;
+            swapsWrites = 0;
+            updateStats();
             initializeArray();
-            resetStats();
+        }
 
-            const algorithm = algorithmSelector.value;
-            switch (algorithm) {
-                case 'bubble-sort':
-                    bubbleSort();
-                    break;
-                case 'selection-sort':
-                    selectionSort();
-                    break;
-                case 'insertion-sort':
-                    insertionSort();
-                    break;
-            }
-        });
-
-        initializeArray();
+        window.onload = initializeArray;
     </script>
 </body>
 </html>
