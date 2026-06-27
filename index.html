@@ -1,325 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sorting Visualization</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #121212;
-      color: #e0e0e0;
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .controls {
-      width: 100%;
-      max-width: 800px;
-      background-color: #1e1e1e;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    }
-    .algorithm-buttons {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    button {
-      background-color: #333;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    button:hover {
-      background-color: #555;
-    }
-    button.active {
-      background-color: #4CAF50;
-    }
-    .slider-container {
-      margin-bottom: 15px;
-    }
-    .slider-label {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 5px;
-    }
-    input[type="range"] {
-      width: 100%;
-    }
-    .array-container {
-      width: 100%;
-      max-width: 800px;
-      height: 400px;
-      background-color: #2a2a2a;
-      border-radius: 8px;
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-    .bar {
-      position: absolute;
-      bottom: 0;
-      width: 4px;
-      background-color: #666;
-      transition: height 0.3s ease, background-color 0.1s ease;
-    }
-    .stats {
-      width: 100%;
-      max-width: 800px;
-      background-color: #1e1e1e;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 15px;
-    }
-    .stat-item {
-      padding: 10px;
-      background-color: #2a2a2a;
-      border-radius: 4px;
-    }
-    .stat-label {
-      font-size: 0.8em;
-      color: #aaa;
-    }
-    .stat-value {
-      font-weight: bold;
-      margin-top: 5px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        #speed-control {
+            width: 150px;
+        }
+        #array-container {
+            display: flex;
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .bar {
+            background-color: steelblue;
+            transition: height 0.3s ease;
+        }
+        #elapsed-time {
+            margin-left: 10px;
+        }
+    </style>
 </head>
 <body>
-  <div class="controls">
     <h1>Sorting Visualization</h1>
-
-    <div class="algorithm-buttons">
-      <button id="bubble-btn" class="algorithm-btn">Bubble Sort</button>
-      <button id="insertion-btn" class="algorithm-btn">Insertion Sort</button>
-      <button id="selection-btn" class="algorithm-btn">Selection Sort</button>
-      <button id="merge-btn" class="algorithm-btn">Merge Sort</button>
-      <button id="quick-btn" class="algorithm-btn">Quick Sort</button>
-      <button id="heap-btn" class="algorithm-btn">Heap Sort</button>
+    <div class="controls">
+        <button id="start-btn">Start</button>
+        <button id="pause-btn" disabled>Pause</button>
+        <button id="resume-btn" disabled>Resume</button>
+        <label for="speed-control">Speed:</label>
+        <input type="range" id="speed-control" min="100" max="2000" value="500">
     </div>
+    <div id="elapsed-time">Elapsed Time: 0s</div>
+    <div id="array-container"></div>
 
-    <div class="slider-container">
-      <div class="slider-label">
-        <span>Speed: Slow</span>
-        <span id="speed-value">100ms</span>
-        <span>Fast</span>
-      </div>
-      <input type="range" id="speed-slider" min="50" max="500" value="200">
-    </div>
+    <script>
+        let array = [];
+        let isRunning = false;
+        let isPaused = true;
+        let currentStep = 0;
+        let elapsedTime = 0;
+        let animationId = null;
+        let speed = 500;
 
-    <div class="slider-container">
-      <div class="slider-label">
-        <span>Array Size: 10</span>
-        <span id="size-value">10</span>
-        <span>200</span>
-      </div>
-      <input type="range" id="size-slider" min="10" max="200" value="50">
-    </div>
-
-    <button id="shuffle-btn">Shuffle & Reset</button>
-    <button id="start-pause-btn">Start</button>
-  </div>
-
-  <div class="array-container" id="array-container"></div>
-
-  <div class="stats">
-    <h2>Statistics</h2>
-    <div class="stats-grid">
-      <div class="stat-item">
-        <div class="stat-label">Algorithm</div>
-        <div class="stat-value" id="current-algorithm">None</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-label">Comparisons</div>
-        <div class="stat-value" id="comparisons">0</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-label">Swaps</div>
-        <div class="stat-value" id="swaps">0</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-label">Time Elapsed</div>
-        <div class="stat-value" id="time-elapsed">0ms</div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // DOM elements
-    const arrayContainer = document.getElementById('array-container');
-    const speedSlider = document.getElementById('speed-slider');
-    const sizeSlider = document.getElementById('size-slider');
-    const shuffleBtn = document.getElementById('shuffle-btn');
-    const startPauseBtn = document.getElementById('start-pause-btn');
-    const algorithmButtons = document.querySelectorAll('.algorithm-btn');
-
-    // State variables
-    let bars = [];
-    let arraySize = 50;
-    let speedDelay = 200;
-    let isSorting = false;
-    let currentAlgorithm = null;
-    let comparisons = 0;
-    let swaps = 0;
-    let startTime = 0;
-
-    // Initialize the visualization
-    function init() {
-      updateArraySize();
-      renderBars();
-
-      // Event listeners
-      speedSlider.addEventListener('input', () => {
-        speedDelay = parseInt(speedSlider.value);
-        document.getElementById('speed-value').textContent = `${speedDelay}ms`;
-      });
-
-      sizeSlider.addEventListener('input', updateArraySize);
-
-      shuffleBtn.addEventListener('click', resetArray);
-
-      startPauseBtn.addEventListener('click', toggleSorting);
-
-      algorithmButtons.forEach(button => {
-        button.addEventListener('click', () => {
-          // Remove active class from all buttons
-          algorithmButtons.forEach(btn => btn.classList.remove('active'));
-          // Add active class to clicked button
-          button.classList.add('active');
-          currentAlgorithm = button.id.replace('-btn', '');
-        });
-      });
-
-      // Initialize with Bubble Sort selected by default
-      document.getElementById('bubble-btn').click();
-    }
-
-    function updateArraySize() {
-      arraySize = parseInt(sizeSlider.value);
-      document.getElementById('size-value').textContent = arraySize;
-      resetArray();
-    }
-
-    function generateRandomArray() {
-      return Array.from({ length: arraySize }, () => Math.floor(Math.random() * 400) + 10);
-    }
-
-    function renderBars() {
-      // Clear existing bars
-      arrayContainer.innerHTML = '';
-
-      // Create new bars based on current array values
-      const values = generateRandomArray();
-      bars = values.map((value, index) => {
-        const bar = document.createElement('div');
-        bar.className = 'bar';
-        bar.style.height = `${value}px`;
-        bar.style.left = `${index * 16}px`;
-        return bar;
-      });
-
-      // Add bars to container
-      bars.forEach(bar => arrayContainer.appendChild(bar));
-    }
-
-    function resetArray() {
-      if (isSorting) return;
-
-      renderBars();
-      comparisons = 0;
-      swaps = 0;
-      document.getElementById('comparisons').textContent = comparisons;
-      document.getElementById('swaps').textContent = swaps;
-      startTime = performance.now();
-    }
-
-    function toggleSorting() {
-      if (isSorting) {
-        isSorting = false;
-        startPauseBtn.textContent = 'Start';
-      } else {
-        isSorting = true;
-        startPauseBtn.textContent = 'Pause';
-
-        // Start sorting based on selected algorithm
-        setTimeout(() => {
-          if (currentAlgorithm === 'bubble') bubbleSort();
-          else if (currentAlgorithm === 'insertion') insertionSort();
-          else if (currentAlgorithm === 'selection') selectionSort();
-          else if (currentAlgorithm === 'merge') mergeSort();
-          else if (currentAlgorithm === 'quick') quickSort();
-          else if (currentAlgorithm === 'heap') heapSort();
-        }, speedDelay);
-      }
-    }
-
-    // Sorting algorithms
-    async function bubbleSort() {
-      const values = bars.map(bar => parseInt(bar.style.height));
-      let n = values.length;
-
-      for (let i = 0; i < n - 1 && isSorting; i++) {
-        for (let j = 0; j < n - i - 1 && isSorting; j++) {
-          comparisons++;
-          document.getElementById('comparisons').textContent = comparisons;
-
-          // Visualize comparison
-          bars[j].style.backgroundColor = '#ff9800';
-          bars[j + 1].style.backgroundColor = '#ff9800';
-
-          await new Promise(resolve => setTimeout(resolve, speedDelay / 2));
-
-          if (values[j] > values[j + 1]) {
-            // Swap
-            [values[j], values[j + 1]] = [values[j + 1], values[j]];
-            swaps++;
-            document.getElementById('swaps').textContent = swaps;
-
-            // Update bar heights
-            bars[j].style.height = `${values[j]}px`;
-            bars[j + 1].style.height = `${values[j + 1]}px`;
-
-            await new Promise(resolve => setTimeout(resolve, speedDelay / 2));
-          }
-
-          // Reset colors
-          bars[j].style.backgroundColor = '#666';
-          bars[j + 1].style.backgroundColor = '#666';
+        function initializeArray() {
+            array = Array.from({length: 20}, () => Math.floor(Math.random() * 100) + 1);
+            renderArray();
         }
-      }
 
-      if (isSorting) {
-        isSorting = false;
-        startPauseBtn.textContent = 'Start';
-        const endTime = performance.now();
-        document.getElementById('time-elapsed').textContent =
-          `${Math.round(endTime - startTime)}ms`;
-      }
-    }
+        function renderArray() {
+            const container = document.getElementById('array-container');
+            container.innerHTML = '';
+            array.forEach(value => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${value * 3}px`;
+                bar.textContent = value;
+                container.appendChild(bar);
+            });
+        }
 
-    async function insertionSort() {
-      const values = bars.map(bar => parseInt(bar.style.height));
-      let n = values.length;
+        function startAnimation() {
+            if (isRunning && !isPaused) return;
 
-      for (let i = 1; i < n && isSorting; i++) {
-        let j = i;
-        while (j > 0 && values[j - 1] > values[j] && isSorting) {
-          comparisons++;
-          document.getElementById('comparisons').textContent = comparisons
+            isRunning = true;
+            isPaused = false;
+            currentStep = 0;
+            elapsedTime = 0;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('pause-btn').disabled = false;
+            document.getElementById('resume-btn').disabled = true;
+
+            animationId = setInterval(() => {
+                if (!isPaused) {
+                    // Simulate sorting step (bubble sort for visualization)
+                    for (let i = 0; i < array.length - currentStep - 1; i++) {
+                        if (array[i] > array[i + 1]) {
+                            [array[i], array[i + 1]] = [array[i + 1], array[i]];
+                        }
+                    }
+                    currentStep++;
+                    renderArray();
+                    elapsedTime += speed / 1000;
+                    document.getElementById('elapsed-time').textContent = `Elapsed Time: ${elapsedTime.toFixed(2)}s`;
+
+                    if (currentStep >= array.length) {
+                        clearInterval(animationId);
+                        isRunning = false;
+                        isPaused = true;
+                        document.getElementById('start-btn').disabled = false;
+                        document.getElementById('pause-btn').disabled = true;
+                    }
+                }
+            }, speed);
+        }
+
+        function pauseAnimation() {
+            isPaused = true;
+            document.getElementById('pause-btn').disabled = true;
+            document.getElementById('resume-btn').disabled = false;
+        }
+
+        function resumeAnimation() {
+            isPaused = false;
+            document.getElementById('pause-btn').disabled = false;
+            document.getElementById('resume-btn').disabled = true;
+        }
+
+        function updateSpeed() {
+            speed = parseInt(document.getElementById('speed-control').value);
+            if (isRunning && !isPaused) {
+                clearInterval(animationId);
+                startAnimation();
+            }
+        }
+
+        document.getElementById('start-btn').addEventListener('click', startAnimation);
+        document.getElementById('pause-btn').addEventListener('click', pauseAnimation);
+        document.getElementById('resume-btn').addEventListener('click', resumeAnimation);
+        document.getElementById('speed-control').addEventListener('input', updateSpeed);
+
+        initializeArray();
+    </script>
+</body>
+</html>
