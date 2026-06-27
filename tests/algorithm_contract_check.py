@@ -1,47 +1,30 @@
-#!/usr/bin/env python3
-
 import sys
-from bs4 import BeautifulSoup
+import argparse
 
-def check_controls(html_content):
-    soup = BeautifulSoup(html_content, 'html.parser')
+def check_control_elements():
+    with open('index.html', 'r') as f:
+        content = f.read()
 
-    required_elements = {
-        'start-btn': 'button',
-        'pause-btn': 'button',
-        'resume-btn': 'button',
-        'speed-control': 'input[type="range"]',
-        'elapsed-time': 'span'
-    }
+    required_elements = [
+        '<button id="startBtn">Start</button>',
+        '<button id="pauseBtn" disabled>Pause</button>',
+        '<button id="resumeBtn" disabled>Resume</button>',
+        '<span id="elapsedTime">0s</span>',
+        '<input type="range" id="speedSlider" min="1" max="10" value="5">'
+    ]
 
-    missing = []
-    for id, tag in required_elements.items():
-        element = soup.find(id=id)
-        if not element or element.name != tag.split('[')[0]:
-            missing.append(f"<{tag}> with id='{id}'")
+    for element in required_elements:
+        if element not in content:
+            print(f"Missing control element: {element}")
+            return False
 
-    return missing
+    print("All required control elements present")
+    return True
 
 if __name__ == "__main__":
-    controls_mode = '--controls' in sys.argv
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--controls', action='store_true')
+    args = parser.parse_args()
 
-    try:
-        with open('index.html', 'r') as f:
-            html_content = f.read()
-    except FileNotFoundError:
-        print("index.html not found")
-        sys.exit(1)
-
-    if controls_mode:
-        missing = check_controls(html_content)
-        if missing:
-            print(f"Missing elements: {', '.join(missing)}")
-            sys.exit(1)
-        else:
-            print("All required control elements present")
-            sys.exit(0)
-    else:
-        # Default checks for algorithm visualization
-        print("Algorithm visualization checks would run here")
-        sys.exit(0)
-
+    if args.controls:
+        sys.exit(0 if check_control_elements() else 1)

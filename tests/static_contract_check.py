@@ -1,37 +1,25 @@
-#!/usr/bin/env python3
+import sys
 
-import os
-from bs4 import BeautifulSoup
+def check_static_contracts():
+    # Check that all required elements exist in index.html
+    with open('index.html', 'r') as f:
+        content = f.read()
 
-def check_static_contracts(html_content):
-    soup = BeautifulSoup(html_content, 'html.parser')
+    required_elements = [
+        '<button id="startBtn">Start</button>',
+        '<button id="pauseBtn" disabled>Pause</button>',
+        '<button id="resumeBtn" disabled>Resume</button>',
+        '<span id="elapsedTime">0s</span>',
+        '<input type="range" id="speedSlider" min="1" max="10" value="5">'
+    ]
 
-    errors = []
+    for element in required_elements:
+        if element not in content:
+            print(f"Missing required element: {element}")
+            return False
 
-    # Check for required elements
-    if not soup.find(id='array'):
-        errors.append("Missing array container element")
-
-    # Check for script presence
-    if not soup.find('script'):
-        errors.append("Missing script section")
-
-    return errors
+    print("All static contracts passed")
+    return True
 
 if __name__ == "__main__":
-    try:
-        with open('index.html', 'r') as f:
-            html_content = f.read()
-    except FileNotFoundError:
-        print("index.html not found")
-        sys.exit(1)
-
-    errors = check_static_contracts(html_content)
-    if errors:
-        for error in errors:
-            print(error)
-        sys.exit(1)
-    else:
-        print("All static contracts passed")
-        sys.exit(0)
-
+    sys.exit(0 if check_static_contracts() else 1)

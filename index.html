@@ -1,122 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sorting Visualization</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .controls { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
-    #speed-control { width: 200px; }
-    #elapsed-time { min-width: 80px; text-align: right; }
-    .array-container { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 20px; }
-    .bar { background-color: steelblue; width: 30px; height: 40px; display: inline-block; transition: height 0.1s; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        input[type="range"] {
+            width: 200px;
+        }
+        .array-container {
+            display: flex;
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .bar {
+            height: 50px;
+            width: 30px;
+            background-color: steelblue;
+        }
+    </style>
 </head>
 <body>
-  <h1>Sorting Visualization</h1>
+    <h1>Sorting Visualization</h1>
+    <div class="controls">
+        <button id="startBtn">Start</button>
+        <button id="pauseBtn" disabled>Pause</button>
+        <button id="resumeBtn" disabled>Resume</button>
+        <span id="elapsedTime">0s</span>
+        <label for="speedSlider">Speed:</label>
+        <input type="range" id="speedSlider" min="1" max="10" value="5">
+    </div>
+    <div class="array-container" id="arrayContainer"></div>
 
-  <div class="controls">
-    <button id="start-btn">Start</button>
-    <button id="pause-btn">Pause</button>
-    <button id="resume-btn">Resume</button>
-    <label for="speed-control">Speed:</label>
-    <input type="range" id="speed-control" min="1" max="10" value="5">
-    <span>Delay: <span id="elapsed-time">0.0s</span></span>
-  </div>
+    <script>
+        let array = [];
+        let isRunning = false;
+        let isPaused = true;
+        let currentStep = 0;
+        let elapsedTime = 0;
+        let speed = 5;
+        let animationId = null;
 
-  <div class="array-container" id="array"></div>
-
-  <script>
-    let array = [];
-    let isRunning = false;
-    let isPaused = true;
-    let currentStep = 0;
-    let elapsedTime = 0;
-    let animationId = null;
-    let speed = 5; // Default speed
-    const delayMap = {1: 200, 2: 150, 3: 100, 4: 80, 5: 60, 6: 50, 7: 40, 8: 30, 9: 20, 10: 10};
-
-    function initializeArray() {
-      array = Array.from({length: 20}, () => Math.floor(Math.random() * 100) + 1);
-      renderArray();
-    }
-
-    function renderArray() {
-      const container = document.getElementById('array');
-      container.innerHTML = '';
-      array.forEach(value => {
-        const bar = document.createElement('div');
-        bar.className = 'bar';
-        bar.style.height = `${value * 2}px`;
-        bar.textContent = value;
-        container.appendChild(bar);
-      });
-    }
-
-    function startAnimation() {
-      if (isRunning && !isPaused) return;
-
-      isRunning = true;
-      isPaused = false;
-      currentStep = 0;
-      elapsedTime = 0;
-      document.getElementById('elapsed-time').textContent = '0.0s';
-
-      animationLoop();
-    }
-
-    function pauseAnimation() {
-      if (!isRunning) return;
-
-      isPaused = true;
-    }
-
-    function resumeAnimation() {
-      if (!isRunning || !isPaused) return;
-
-      isPaused = false;
-      animationLoop();
-    }
-
-    function updateSpeed() {
-      speed = parseInt(document.getElementById('speed-control').value);
-    }
-
-    function animationLoop() {
-      if (isPaused) return;
-
-      // Simulate sorting steps
-      const delay = delayMap[speed] || 60;
-      elapsedTime += delay / 1000;
-
-      document.getElementById('elapsed-time').textContent = `${elapsedTime.toFixed(1)}s`;
-
-      currentStep++;
-      if (currentStep >= array.length * 2) {
-        isRunning = false;
-        return;
-      }
-
-      // Simple bubble sort simulation
-      for (let i = 0; i < array.length - 1 && !isPaused; i++) {
-        if (array[i] > array[i + 1]) {
-          [array[i], array[i + 1]] = [array[i + 1], array[i]];
-          renderArray();
-          break;
+        function initializeArray() {
+            array = Array.from({length: 20}, () => Math.floor(Math.random() * 100) + 1);
+            renderArray();
         }
-      }
 
-      animationId = setTimeout(animationLoop, delay);
-    }
+        function renderArray() {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            array.forEach(value => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${value * 2}px`;
+                container.appendChild(bar);
+            });
+        }
 
-    document.getElementById('start-btn').addEventListener('click', startAnimation);
-    document.getElementById('pause-btn').addEventListener('click', pauseAnimation);
-    document.getElementById('resume-btn').addEventListener('click', resumeAnimation);
-    document.getElementById('speed-control').addEventListener('input', updateSpeed);
+        function startAnimation() {
+            if (isRunning && !isPaused) return;
+            isRunning = true;
+            isPaused = false;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
 
-    initializeArray();
-  </script>
+            animationId = setInterval(() => {
+                if (!isPaused) {
+                    // Simulate sorting step
+                    currentStep++;
+                    elapsedTime += 100; // Increment by 100ms
+
+                    // Update elapsed time display
+                    document.getElementById('elapsedTime').textContent =
+                        `${(elapsedTime / 1000).toFixed(1)}s`;
+
+                    // Simple bubble sort step for visualization
+                    for (let i = 0; i < array.length - 1; i++) {
+                        if (array[i] > array[i + 1]) {
+                            [array[i], array[i + 1]] = [array[i + 1], array[i]];
+                            renderArray();
+                            break;
+                        }
+                    }
+
+                    // Check if sorting is complete
+                    if (isSorted()) {
+                        clearInterval(animationId);
+                        isRunning = false;
+                        document.getElementById('startBtn').disabled = false;
+                        document.getElementById('pauseBtn').disabled = true;
+                        document.getElementById('resumeBtn').disabled = true;
+                    }
+                }
+            }, 1000 / speed);
+        }
+
+        function pauseAnimation() {
+            isPaused = true;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('resumeBtn').disabled = false;
+        }
+
+        function resumeAnimation() {
+            isPaused = false;
+            document.getElementById('resumeBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+        }
+
+        function updateSpeed() {
+            speed = parseInt(document.getElementById('speedSlider').value);
+            if (animationId) {
+                clearInterval(animationId);
+                startAnimation();
+            }
+        }
+
+        function isSorted() {
+            for (let i = 0; i < array.length - 1; i++) {
+                if (array[i] > array[i + 1]) return false;
+            }
+            return true;
+        }
+
+        document.getElementById('startBtn').addEventListener('click', startAnimation);
+        document.getElementById('pauseBtn').addEventListener('click', pauseAnimation);
+        document.getElementById('resumeBtn').addEventListener('click', resumeAnimation);
+        document.getElementById('speedSlider').addEventListener('input', updateSpeed);
+
+        initializeArray();
+    </script>
 </body>
 </html>
-
