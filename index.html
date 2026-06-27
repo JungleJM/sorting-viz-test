@@ -1,335 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sorting Visualization Test</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    #array-container { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 20px; }
-    .bar { background-color: steelblue; width: 10px; height: 30px; display: inline-block; transition: all 0.1s; }
-    .active-compare { background-color: red !important; }
-    .active-write { background-color: green !important; }
-    button { padding: 8px 12px; margin-right: 10px; cursor: pointer; }
-    #controls { margin-bottom: 20px; }
-    #stats { margin-top: 20px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Visualization Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .controls { margin-bottom: 20px; }
+        button { padding: 8px 16px; margin-right: 10px; cursor: pointer; }
+        #array-container { display: flex; align-items: center; gap: 5px; margin-bottom: 20px; }
+        .bar { width: 30px; height: 50px; background-color: steelblue; display: inline-block; transition: all 0.1s; }
+        .sorted { background-color: green !important; }
+        #stats { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
+    </style>
 </head>
 <body>
-  <h1>Sorting Visualization Test</h1>
-  <div id="controls">
-    <button onclick="startSort('bubble')">Bubble Sort</button>
-    <button onclick="startSort('merge')">Merge Sort</button>
-    <button onclick="startSort('quick')">Quick Sort</button>
-    <button onclick="startSort('heap')">Heap Sort</button>
-    <button onclick="resetArray()">Reset Array</button>
-  </div>
-  <div id="array-container"></div>
-  <div id="stats">
-    Comparisons: <span id="comparison-count">0</span><br>
-    Swaps/Writes: <span id="swap-count">0</span>
-  </div>
+    <h1>Sorting Visualization Test</h1>
+    <div class="controls">
+        <button onclick="startSort('bubbleSort')">Bubble Sort</button>
+        <button onclick="startSort('selectionSort')">Selection Sort</button>
+        <button onclick="resetArray()">Reset Array</button>
+    </div>
+    <div id="array-container"></div>
+    <div id="stats">
+        <p>Algorithm: <span id="algorithm-name">None</span></p>
+        <p>Comparisons: <span id="comparisons">0</span></p>
+        <p>Swaps/Writes: <span id="swaps-writes">0</span></p>
+        <p>Elapsed Time: <span id="elapsed-time">0</span> ms</p>
+    </div>
 
-  <script>
-    let array = [];
-    let comparisonCount = 0;
-    let swapCount = 0;
-    let isSorting = false;
+    <script>
+        let array = [];
+        let isSorting = false;
+        let comparisons = 0;
+        let swapsWrites = 0;
+        let startTime = 0;
+        let currentAlgorithm = '';
 
-    function initArray() {
-      array = Array.from({length: 200}, () => Math.floor(Math.random() * 300) + 10);
-      renderArray();
-    }
-
-    function renderArray() {
-      const container = document.getElementById('array-container');
-      container.innerHTML = '';
-      array.forEach(value => {
-        const bar = document.createElement('div');
-        bar.className = 'bar';
-        bar.style.height = `${value}px`;
-        container.appendChild(bar);
-      });
-    }
-
-    function resetArray() {
-      if (isSorting) return;
-      initArray();
-    }
-
-    async function startSort(algorithm) {
-      if (isSorting) return;
-      isSorting = true;
-
-      comparisonCount = 0;
-      swapCount = 0;
-      document.getElementById('comparison-count').textContent = comparisonCount;
-      document.getElementById('swap-count').textContent = swapCount;
-
-      switch(algorithm) {
-        case 'bubble':
-          await bubbleSort();
-          break;
-        case 'merge':
-          await mergeSort(array, 0, array.length - 1);
-          break;
-        case 'quick':
-          await quickSort(array, 0, array.length - 1);
-          break;
-        case 'heap':
-          await heapSort();
-          break;
-      }
-
-      isSorting = false;
-    }
-
-    async function bubbleSort() {
-      for (let i = 0; i < array.length - 1; i++) {
-        for (let j = 0; j < array.length - i - 1; j++) {
-          comparisonCount++;
-          document.getElementById('comparison-count').textContent = comparisonCount;
-
-          const bar1 = document.querySelectorAll('.bar')[j];
-          const bar2 = document.querySelectorAll('.bar')[j + 1];
-
-          bar1.classList.add('active-compare');
-          bar2.classList.add('active-compare');
-
-          await new Promise(resolve => setTimeout(resolve, 50));
-
-          if (array[j] > array[j + 1]) {
-            [array[j], array[j + 1]] = [array[j + 1], array[j]];
-            swapCount++;
-            document.getElementById('swap-count').textContent = swapCount;
-
-            bar1.classList.remove('active-compare');
-            bar2.classList.remove('active-compare');
-
-            bar1.classList.add('active-write');
-            bar2.classList.add('active-write');
-
-            await new Promise(resolve => setTimeout(resolve, 50));
-
+        function initializeArray() {
+            array = Array.from({length: 20}, () => Math.floor(Math.random() * 100) + 1);
             renderArray();
-          } else {
-            bar1.classList.remove('active-compare');
-            bar2.classList.remove('active-compare');
-          }
-        }
-      }
-    }
-
-    async function mergeSort(arr, left, right) {
-      if (left < right) {
-        const mid = Math.floor((left + right) / 2);
-        await mergeSort(arr, left, mid);
-        await mergeSort(arr, mid + 1, right);
-        await merge(arr, left, mid, right);
-      }
-    }
-
-    async function merge(arr, left, mid, right) {
-      const n1 = mid - left + 1;
-      const n2 = right - mid;
-
-      const L = arr.slice(left, mid + 1);
-      const R = arr.slice(mid + 1, right + 1);
-
-      let i = 0, j = 0, k = left;
-
-      while (i < n1 && j < n2) {
-        comparisonCount++;
-        document.getElementById('comparison-count').textContent = comparisonCount;
-
-        const barL = document.querySelectorAll('.bar')[left + i];
-        const barR = document.querySelectorAll('.bar')[mid + 1 + j];
-
-        barL.classList.add('active-compare');
-        barR.classList.add('active-compare');
-
-        await new Promise(resolve => setTimeout(resolve, 50));
-
-        if (L[i] <= R[j]) {
-          arr[k] = L[i];
-          i++;
-        } else {
-          arr[k] = R[j];
-          j++;
         }
 
-        barL.classList.remove('active-compare');
-        barR.classList.remove('active-compare');
-
-        const writeBar = document.querySelectorAll('.bar')[k];
-        writeBar.classList.add('active-write');
-
-        await new Promise(resolve => setTimeout(resolve, 50));
-        writeBar.classList.remove('active-write');
-
-        k++;
-      }
-
-      while (i < n1) {
-        arr[k] = L[i];
-        i++;
-        k++;
-      }
-
-      while (j < n2) {
-        arr[k] = R[j];
-        j++;
-        k++;
-      }
-
-      renderArray();
-    }
-
-    async function quickSort(arr, left, right) {
-      if (left < right) {
-        const pivotIndex = await partition(arr, left, right);
-        await quickSort(arr, left, pivotIndex - 1);
-        await quickSort(arr, pivotIndex + 1, right);
-      }
-    }
-
-    async function partition(arr, left, right) {
-      const pivot = arr[right];
-      let i = left - 1;
-
-      for (let j = left; j < right; j++) {
-        comparisonCount++;
-        document.getElementById('comparison-count').textContent = comparisonCount;
-
-        const barJ = document.querySelectorAll('.bar')[j];
-        const barPivot = document.querySelectorAll('.bar')[right];
-
-        barJ.classList.add('active-compare');
-        barPivot.classList.add('active-compare');
-
-        await new Promise(resolve => setTimeout(resolve, 50));
-
-        if (arr[j] < pivot) {
-          i++;
-          [arr[i], arr[j]] = [arr[j], arr[i]];
-          swapCount++;
-          document.getElementById('swap-count').textContent = swapCount;
-
-          barJ.classList.remove('active-compare');
-          barPivot.classList.remove('active-compare');
-
-          const barI = document.querySelectorAll('.bar')[i];
-          barI.classList.add('active-write');
-
-          await new Promise(resolve => setTimeout(resolve, 50));
-          barI.classList.remove('active-write');
-        } else {
-          barJ.classList.remove('active-compare');
-          barPivot.classList.remove('active-compare');
-        }
-      }
-
-      [arr[i + 1], arr[right]] = [arr[right], arr[i + 1]];
-      swapCount++;
-      document.getElementById('swap-count').textContent = swapCount;
-
-      renderArray();
-      return i + 1;
-    }
-
-    async function heapSort() {
-      const n = array.length;
-
-      for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
-        await heapify(array, n, i);
-      }
-
-      for (let i = n - 1; i > 0; i--) {
-        [array[0], array[i]] = [array[i], array[0]];
-        swapCount++;
-        document.getElementById('swap-count').textContent = swapCount;
-
-        const bar0 = document.querySelectorAll('.bar')[0];
-        const barI = document.querySelectorAll('.bar')[i];
-
-        bar0.classList.add('active-write');
-        barI.classList.add('active-write');
-
-        await new Promise(resolve => setTimeout(resolve, 50));
-        bar0.classList.remove('active-write');
-        barI.classList.remove('active-write');
-
-        renderArray();
-        await heapify(array, i, 0);
-      }
-    }
-
-    async function heapify(arr, n, i) {
-      let largest = i;
-      const left = 2 * i + 1;
-      const right = 2 * i + 2;
-
-      if (left < n) {
-        comparisonCount++;
-        document.getElementById('comparison-count').textContent = comparisonCount;
-
-        const barLargest = document.querySelectorAll('.bar')[largest];
-        const barLeft = document.querySelectorAll('.bar')[left];
-
-        barLargest.classList.add('active-compare');
-        barLeft.classList.add('active-compare');
-
-        await new Promise(resolve => setTimeout(resolve, 50));
-
-        if (arr[left] > arr[largest]) {
-          largest = left;
+        function renderArray() {
+            const container = document.getElementById('array-container');
+            container.innerHTML = '';
+            array.forEach(value => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${value * 2}px`;
+                bar.textContent = value;
+                container.appendChild(bar);
+            });
         }
 
-        barLargest.classList.remove('active-compare');
-        barLeft.classList.remove('active-compare');
-      }
-
-      if (right < n) {
-        comparisonCount++;
-        document.getElementById('comparison-count').textContent = comparisonCount;
-
-        const barLargest = document.querySelectorAll('.bar')[largest];
-        const barRight = document.querySelectorAll('.bar')[right];
-
-        barLargest.classList.add('active-compare');
-        barRight.classList.add('active-compare');
-
-        await new Promise(resolve => setTimeout(resolve, 50));
-
-        if (arr[right] > arr[largest]) {
-          largest = right;
+        function updateStats() {
+            document.getElementById('algorithm-name').textContent = currentAlgorithm;
+            document.getElementById('comparisons').textContent = comparisons;
+            document.getElementById('swaps-writes').textContent = swapsWrites;
+            const elapsedTime = Date.now() - startTime;
+            document.getElementById('elapsed-time').textContent = elapsedTime;
         }
 
-        barLargest.classList.remove('active-compare');
-        barRight.classList.remove('active-compare');
-      }
+        function resetStats() {
+            comparisons = 0;
+            swapsWrites = 0;
+            startTime = Date.now();
+            updateStats();
+        }
 
-      if (largest !== i) {
-        [arr[i], arr[largest]] = [arr[largest], arr[i]];
-        swapCount++;
-        document.getElementById('swap-count').textContent = swapCount;
+        async function bubbleSort() {
+            isSorting = true;
+            currentAlgorithm = 'Bubble Sort';
+            resetStats();
 
-        const barI = document.querySelectorAll('.bar')[i];
-        const barLargest = document.querySelectorAll('.bar')[largest];
+            for (let i = 0; i < array.length - 1 && isSorting; i++) {
+                for (let j = 0; j < array.length - i - 1 && isSorting; j++) {
+                    comparisons++;
+                    updateStats();
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    if (array[j] > array[j + 1]) {
+                        [array[j], array[j + 1]] = [array[j + 1], array[j]];
+                        swapsWrites++;
+                        renderArray();
+                        updateStats();
+                    }
+                }
+            }
 
-        barI.classList.add('active-write');
-        barLargest.classList.add('active-write');
+            markAllSorted();
+            isSorting = false;
+        }
 
-        await new Promise(resolve => setTimeout(resolve, 50));
-        barI.classList.remove('active-write');
-        barLargest.classList.remove('active-write');
+        async function selectionSort() {
+            isSorting = true;
+            currentAlgorithm = 'Selection Sort';
+            resetStats();
 
-        renderArray();
-        await heapify(arr, n, largest);
-      }
-    }
+            for (let i = 0; i < array.length - 1 && isSorting; i++) {
+                let minIndex = i;
 
-    initArray();
-  </script>
+                for (let j = i + 1; j < array.length && isSorting; j++) {
+                    comparisons++;
+                    updateStats();
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    if (array[j] < array[minIndex]) {
+                        minIndex = j;
+                    }
+                }
+
+                if (minIndex !== i) {
+                    [array[i], array[minIndex]] = [array[minIndex], array[i]];
+                    swapsWrites++;
+                    renderArray();
+                    updateStats();
+                }
+            }
+
+            markAllSorted();
+            isSorting = false;
+        }
+
+        function markAllSorted() {
+            const bars = document.querySelectorAll('.bar');
+            bars.forEach(bar => bar.classList.add('sorted'));
+        }
+
+        function startSort(algorithm) {
+            if (isSorting) return;
+
+            resetArray();
+            if (algorithm === 'bubbleSort') bubbleSort();
+            else selectionSort();
+        }
+
+        function resetArray() {
+            isSorting = false;
+            currentAlgorithm = '';
+            comparisons = 0;
+            swapsWrites = 0;
+            updateStats();
+            initializeArray();
+        }
+
+        window.onload = initializeArray;
+    </script>
 </body>
 </html>
