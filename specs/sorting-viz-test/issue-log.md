@@ -1,14 +1,19 @@
-# Issue Log for Sorting Visualization
+# Sorting Viz Test Issue Log
 
-## Known Issues
+## Managed Loop Results
 
-### UI/UX Issues
-- [ ] On very small screens (< 400px width), the control buttons wrap to multiple lines, making the interface less compact.
-- [ ] The color contrast between the comparing state (red) and sorted state (green) could be improved for better accessibility.
+- Task 001 passed and merged into `feature/sorting-viz-test`.
+- Task 002 produced a usable scaffold, but the generated tests were too brittle and incorrectly required exact markup. The harness was manually corrected before continuing.
+- Tasks 003 through 007 passed local worker review and were merged into `feature/sorting-viz-test`.
+- Task 007 regressed the original single-file requirement by moving runtime code into `specs/sorting-viz-test/algorithm.js` and `specs/sorting-viz-test/visualization.js`.
 
-### Browser Compatibility
-- [ ] Tested on Chrome, Firefox, and Safari. No major issues found.
-- [ ] Edge may have slight rendering differences in the bar heights during animation.
+## Final Manual Hardening
 
-### Performance
-- [ ] Large arrays (> 5
+- Restored the app to a self-contained `index.html` that can be opened directly in a browser.
+- Removed external runtime JavaScript files from the spec folder.
+- Replaced static and algorithm contract tests so they check the single-file contract, required controls, six sorting algorithms, rendering hooks, and stats hooks.
+
+## Residual Risks
+
+- The UI proof is browser-smoke level, not a full visual regression suite.
+- The app is intentionally small and educational; it does not attempt to benchmark algorithm performance.
