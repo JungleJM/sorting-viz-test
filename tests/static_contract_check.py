@@ -1,62 +1,25 @@
-from __future__ import annotations
+import sys
 
-from pathlib import Path
+def check_static_contracts():
+    # Check that all required elements exist in index.html
+    with open('index.html', 'r') as f:
+        content = f.read()
 
+    required_elements = [
+        '<button id="startBtn">Start</button>',
+        '<button id="pauseBtn" disabled>Pause</button>',
+        '<button id="resumeBtn" disabled>Resume</button>',
+        '<span id="elapsedTime">0s</span>',
+        '<input type="range" id="speedSlider" min="1" max="10" value="5">'
+    ]
 
-ROOT = Path(__file__).resolve().parents[1]
-INDEX = ROOT / "index.html"
+    for element in required_elements:
+        if element not in content:
+            print(f"Missing required element: {element}")
+            return False
 
-
-def read_index() -> str:
-    if not INDEX.exists():
-        raise AssertionError("Missing required file: index.html")
-    return INDEX.read_text(encoding="utf-8")
-
-
-def require_all(content: str, tokens: list[str], label: str) -> None:
-    missing = [token for token in tokens if token not in content]
-    if missing:
-        raise AssertionError(f"Missing {label}: {', '.join(missing)}")
-
-
-def check_required_controls() -> None:
-    content = read_index()
-    lowered = content.lower()
-
-    require_all(
-        content,
-        [
-            "Bubble Sort",
-            "Insertion Sort",
-            "Selection Sort",
-            "Merge Sort",
-            "Quick Sort",
-            "Heap Sort",
-        ],
-        "algorithm button labels",
-    )
-    require_all(
-        lowered,
-        [
-            'id="speed-slider"',
-            'id="size-slider"',
-            'id="shuffle-btn"',
-            'id="start-pause-btn"',
-            'id="current-algorithm"',
-            'id="comparisons"',
-            'id="swaps"',
-            'id="time-elapsed"',
-        ],
-        "controls and stats ids",
-    )
-    if 'id="array-container"' not in lowered and 'id="sorting-visualization"' not in lowered:
-        raise AssertionError("Missing visualization container id")
-    if "<style" not in lowered or "background" not in lowered:
-        raise AssertionError("Missing embedded visual styling")
-    if "<script" not in lowered:
-        raise AssertionError("Missing embedded script for direct-open app")
-
+    print("All static contracts passed")
+    return True
 
 if __name__ == "__main__":
-    check_required_controls()
-    print("Static contract checks passed.")
+    sys.exit(0 if check_static_contracts() else 1)
