@@ -29,8 +29,28 @@ No build step should be required.
   - screenshot after completion showing sorted bars;
   - evidence that array size and speed controls work.
 
+Feature-level proof artifacts are stored in:
+
+```text
+specs/sorting-viz-test/proof/feature-final/
+```
+
 ## Task proof entries
 
 Each task in `task-breakdown.md` lists its required tests. Reviewers should not
 approve a task unless the task-specific tests either pass or the issue log
 explains why proof could not be collected.
+
+Future task proof should use task-scoped folders:
+
+```text
+specs/sorting-viz-test/proof/tasks/NNN-<task-slug>/
+  screenshots/
+  videos/
+  logs/
+  proof-result.md
+```
+
+This completed sorting-viz run has feature-level proof only. Per-task proof was
+not captured because Loop Manager was still in dry-run PR mode and proof posting
+was not yet a first-class task PR gate.

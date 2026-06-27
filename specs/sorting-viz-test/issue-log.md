@@ -43,7 +43,10 @@
   contract, required controls, six sorting algorithms, rendering hooks, and
   stats hooks.
 - Captured final desktop, running-state, mobile, and short video proof artifacts
-  in `specs/sorting-viz-test/proof/`.
+  in `specs/sorting-viz-test/proof/feature-final/`.
+- Per-task proof artifacts were not captured during this run because Loop
+  Manager was still in dry-run PR mode and proof posting was not yet a
+  first-class task PR gate.
 
 ## Residual Risks
 
