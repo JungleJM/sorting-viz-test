@@ -24,3 +24,12 @@ specs/<feature-slug>/proof/feature-final/
 
 For future managed runs, task proof should be linked or posted on the Gitea task
 PR before the task branch merges into the feature branch.
+
+Task PRs should include the rendered task spec in the PR body. That makes Gitea
+the central review surface for the code-review node, local PR-Agent,
+Codex/OpenAI PR-Agent, and human review.
+
+If local PR-Agent cannot run, record the reason on the task PR and prioritize
+Codex/OpenAI PR review. If both PR-Agent paths are unavailable, leave the task
+blocked for human review unless the project explicitly marks PR-Agent review
+optional.
