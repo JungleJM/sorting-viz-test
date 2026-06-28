@@ -28,6 +28,18 @@ Record the result in `setup-notes.md` or the issue log. If this check fails,
 fix the Loop Manager/templates issue before submitting the PlanContract to
 Bluefin.
 
+Before assigning task models, query the Loop Manager runtime that will execute
+the plan:
+
+```sh
+curl -fsS "$LOOP_MANAGER_API_URL/worker-models"
+```
+
+Use only worker/profile names from that inventory when writing
+`recommended_worker` and `recommended_model_profile` in the PlanContract. If the
+runtime cannot provide the inventory, stop and record the issue instead of
+guessing a model name.
+
 When the spec is ready to start, submit it with:
 
 ```sh
@@ -106,6 +118,40 @@ A local-LLM-sized task should usually:
 Re-split before implementation if the task needs more than one main proof video,
 more than one state machine, or more than one independent reviewer question.
 
+## Model Routing Rule
+
+The frontier planner should recommend the developer worker/model profile for
+each task. This is a planning judgment, not a hardcoded algorithm. Match the
+task type to the available inventory:
+
+- small, bounded code patches: prefer the proven reliable implementer profile;
+- broad scaffolding or protocol-sensitive edits: prefer the most
+  instruction-following coding profile, or split the task before assigning it;
+- deep reasoning tasks: use a deeper model only when latency is acceptable and
+  the task is already narrow;
+- UI-heavy or experimental work: route only when the inventory marks that model
+  suitable, and add stronger proof/check requirements.
+
+Each PlanContract task should include:
+
+- `recommended_worker`: the worker name from `/worker-models`;
+- `recommended_model_profile`: the profile key from that worker;
+- `fallback_policy`: what to do after repeated failure.
+
+If a frontier developer fallback is available and allowed by policy, the
+fallback policy may say to hand the task to the frontier model after local
+attempts are exhausted. If a frontier developer fallback is not available, the
+policy should say to return the failed task and failure artifact to frontier
+planning for reassessment. The reassessment must choose one of:
+
+- split the task into smaller tasks;
+- keep the task but route it to a different available worker/model profile;
+- stop for human review because the acceptance criteria or proof requirement is
+  ambiguous.
+
+Repeated protocol failures, such as no usable patch/file bundle, count as a
+model-fit failure even when the task did not time out.
+
 ## Proof Planning Rule
 
 Proof should be designed before implementation.
@@ -128,6 +174,10 @@ decisions into existing fields:
 - `acceptance_criteria`: observable behavior and important edge cases;
 - `checks`: deterministic commands Loop Manager can run;
 - `allowed_paths` and `forbidden_paths`: scope boundaries;
+- `recommended_worker` and `recommended_model_profile`: planner-selected
+  implementation route from `/worker-models`;
+- `fallback_policy`: retry/re-route/frontier-reassessment rule after repeated
+  failure;
 - `risk_flags`: high-fragility or human-stop markers.
 
 Do not ask Bluefin to make product decisions. Encode decisions in the task spec

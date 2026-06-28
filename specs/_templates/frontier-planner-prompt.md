@@ -22,6 +22,15 @@ Read these project-local files before planning:
 - specs/_templates/proof-plan.md
 - specs/_templates/plan-contract.template.yaml
 
+Before writing model routing into the PlanContract, query the Loop Manager
+runtime that will execute the plan:
+
+  curl -fsS "$LOOP_MANAGER_API_URL/worker-models"
+
+Use only worker names and model profile keys returned by that endpoint. If the
+endpoint is unavailable, do not invent model names; write the specs without
+submitting the plan and record the blocker.
+
 Produce or update:
 - specs/<feature-slug>/feature-brief.md
 - specs/<feature-slug>/task-breakdown.md
@@ -64,6 +73,14 @@ Planning rules:
 - Use forbidden_paths for secrets, production infra, generated artifacts, and
   unrelated areas.
 - Use max_attempts: 3 unless the human requested otherwise.
+- For each task, set recommended_worker and recommended_model_profile from the
+  /worker-models inventory when a suitable local developer route exists.
+- For each task, set fallback_policy. If frontier developer fallback is allowed,
+  say when the frontier model should take over after local failure. If it is not
+  allowed, say when repeated local failures should return to frontier planning
+  for task split/model reassessment.
+- Treat repeated no-patch/no-file-bundle/model-protocol failures as model-fit
+  failures, not only as task failures.
 - Use human_review_required: true.
 - Include no_auto_merge or no_auto_merge_to_main in risk_flags.
 - Do not ask Bluefin to make product decisions. Put decision rules in the task
@@ -75,11 +92,19 @@ Before finalizing, include in the task breakdown:
 - Fragility review: high-risk tasks and the proof/checks added for them.
 - Re-splitting triggers: when Loop Manager should stop and ask for a narrower
   task.
+- Model routing: why each task's recommended developer model/profile fits the
+  task type, and when to use a different model or frontier fallback.
 
 Decision-rule style:
 - If X passes, proceed to Y.
 - If X fails and attempts remain, retry with failure summary.
 - If X fails after max_attempts, human_review.
+- If local implementation fails twice for the same timeout/protocol/broadness
+  reason and frontier fallback is available, hand the task plus failure artifact
+  to frontier implementation.
+- If local implementation fails twice for the same timeout/protocol/broadness
+  reason and frontier fallback is not available, return the task plus failure
+  artifact to frontier planning for split/model reassessment.
 - If a forbidden path is required, human_review.
 - If acceptance criteria are ambiguous, human_review.
 

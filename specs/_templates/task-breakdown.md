@@ -62,11 +62,39 @@ browser storage, reload persistence, date/time comparison, responsive layout,
 canvas/WebGL/media/file APIs, async network behavior, auth, migrations, secrets,
 production data, and generated assets.
 
+## Model routing review
+
+Query the target Loop Manager runtime before completing this table:
+
+```sh
+curl -fsS "$LOOP_MANAGER_API_URL/worker-models"
+```
+
+Use only worker/profile names from that inventory.
+
+| Task | Recommended worker/profile | Why this model fits | Fallback after repeated failure |
+|------|----------------------------|---------------------|----------------------------------|
+| `<NNN>` | `<worker>/<profile>` | `<task type fit>` | `<frontier takeover or frontier re-split/model reassessment>` |
+
+Model routing rules:
+
+- Prefer proven reliable local implementer profiles for small bounded code
+  patches.
+- Split scaffolding/protocol-sensitive tasks before assigning them to a model
+  that has shown file-bundle or patch-format failures.
+- Use deeper models for narrow reasoning-heavy work, not as a substitute for
+  unclear task boundaries.
+- If frontier developer fallback is allowed, repeated local failure may hand the
+  task and failure artifact to the frontier model.
+- If frontier developer fallback is not allowed, repeated local failure should
+  return the task and failure artifact to frontier planning for split/model
+  reassessment.
+
 ## Task list
 
-| N | Task | Branch | PR target | Proof | Auto-merge eligible |
-|---|------|--------|-----------|-------|---------------------|
-| 001 | <task title> | `task/<feature-slug>-001-<task-slug>` | `feature/<feature-slug>` | Playwright/asciinema/N/A | yes/no |
+| N | Task | Branch | PR target | Worker/profile | Proof | Auto-merge eligible |
+|---|------|--------|-----------|----------------|-------|---------------------|
+| 001 | <task title> | `task/<feature-slug>-001-<task-slug>` | `feature/<feature-slug>` | `<worker>/<profile>` | Playwright/asciinema/N/A | yes/no |
 
 ## Human-test checkpoint
 
@@ -86,9 +114,19 @@ Manager should re-split or narrow a task if:
 
 - review fails twice for related reasons;
 - the development node repeats the same error;
+- the development node repeatedly times out or returns no usable patch/file
+  bundle;
 - the task touches too many unrelated areas;
 - verification cannot be run deterministically.
 - the task needs more than one main proof video;
 - the task contains multiple state machines or independent user workflows;
 - a fragile browser/API/storage/date/animation task lacks deterministic rules,
   stable selectors/hooks, or explicit proof.
+
+After repeated local implementation failure, frontier reassessment should choose:
+
+- split into smaller tasks;
+- route the same narrowed task to a different available worker/profile;
+- hand the task to frontier implementation when that fallback is available and
+  allowed;
+- stop for human review when the task is ambiguous.

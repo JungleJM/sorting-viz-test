@@ -44,6 +44,13 @@ Useful options:
 - `-v`: print selected plan and monitoring URLs.
 - `-vv`: also print a detailed response summary.
 
+Before submission, the script:
+
+- runs `.loop-manager/scripts/verify-spec-planning.sh` unless `--skip-verify`
+  is passed;
+- checks Loop Manager health at `/health`;
+- queries `/worker-models` so the runtime exposes the valid worker/model
+  profile names used by frontier-generated PlanContracts.
+
 After submission, the script prints the Loop Manager dashboard URL, Paperclip
 dashboard URL, Paperclip events URL, and the plan dashboard URL.
-

@@ -209,7 +209,7 @@ require_cmd ruby
 
 api_url="${api_url%/}"
 if [[ -z "$dashboard_url" ]]; then
-  dashboard_url="$api_url/dashboard"
+  dashboard_url="$api_url"
 fi
 
 selected_plan="$(find_plan)"
@@ -243,6 +243,31 @@ fi
 
 log "Checking Loop Manager health: $api_url/health"
 curl -fsS "$api_url/health" >/dev/null
+
+log "Checking Loop Manager worker/model inventory: $api_url/worker-models"
+worker_models_file="$(mktemp)"
+worker_model_status="$(
+  curl -sS -o "$worker_models_file" -w "%{http_code}" \
+    "$api_url/worker-models"
+)"
+if [[ "$worker_model_status" != "200" ]]; then
+  cat "$worker_models_file" >&2
+  rm -f "$worker_models_file"
+  die "worker/model inventory failed with HTTP $worker_model_status"
+fi
+if (( verbosity >= 1 )); then
+  ruby -rjson -e '
+    data = JSON.parse(File.read(ARGV.fetch(0)))
+    puts "Available worker/model profiles:"
+    Array(data["workers"]).each do |worker|
+      profiles = (worker["model_profiles"] || {}).map do |name, profile|
+        "#{name}=#{profile["model"]}"
+      end
+      puts "  - #{worker["worker"]} (#{worker["role"]}): #{profiles.join(", ")}"
+    end
+  ' "$worker_models_file"
+fi
+rm -f "$worker_models_file"
 
 log "Submitting plan to: $api_url/plans"
 log "Note: current Loop Manager /plans requests are synchronous; this command may stay open until the plan stops or completes."

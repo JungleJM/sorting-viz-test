@@ -36,6 +36,13 @@ tasks:
       - secrets/**
       - credentials/**
       - infrastructure/prod/**
+    recommended_worker: replace-with-worker-from-worker-models-or-null
+    recommended_model_profile: replace-with-profile-from-worker-models-or-null
+    fallback_policy: >
+      Replace with retry and reassessment rule. Example: after two repeated
+      timeout/protocol failures, return the failure artifact to frontier
+      planning for split/model reassessment unless frontier implementation
+      fallback is explicitly available.
     max_attempts: 3
     human_review_required: true
     risk_flags:
