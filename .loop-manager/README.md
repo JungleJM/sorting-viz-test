@@ -31,6 +31,10 @@ templates. For a production Loop Manager run:
 6. Run `.loop-manager/scripts/verify-spec-planning.sh` at the end of spec
    making. This runs the Loop Manager source tests through `uv` so template and
    planning changes are checked before Bluefin receives the spec.
+7. Submit the PlanContract with `.loop-manager/scripts/submit-plan.sh`. The
+   script discovers `specs/*/plan-contract.bluefin.yaml`, runs verification
+   unless skipped, posts the plan to Bluefin, and prints dashboard/Paperclip
+   URLs for monitoring.
 
 Planner output should include a test matrix, behavior-bundling review, and
 fragility review. If the target repo lacks a strong test harness, the first task
@@ -39,6 +43,15 @@ should normally create one and define task-scoped checks for the planned work.
 The final spec-making step should record whether
 `.loop-manager/scripts/verify-spec-planning.sh` passed. If it fails, fix the
 Loop Manager/template issue before submitting the PlanContract.
+
+When ready to start the run, use:
+
+```sh
+.loop-manager/scripts/submit-plan.sh --feature <feature-slug> -v
+```
+
+If there is only one `plan-contract.bluefin.yaml` under `specs/`, the script can
+discover it without `--feature`. Use `-vv` for a more detailed terminal summary.
 
 For real-worker runs, the manager should create and push a task branch before
 developer/reviewer activation. Workers should checkout that branch locally,

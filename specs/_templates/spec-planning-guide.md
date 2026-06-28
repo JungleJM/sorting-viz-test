@@ -28,6 +28,15 @@ Record the result in `setup-notes.md` or the issue log. If this check fails,
 fix the Loop Manager/templates issue before submitting the PlanContract to
 Bluefin.
 
+When the spec is ready to start, submit it with:
+
+```sh
+.loop-manager/scripts/submit-plan.sh --feature <feature-slug> -v
+```
+
+This discovers the PlanContract, runs verification, posts to Bluefin, and prints
+dashboard/Paperclip URLs.
+
 ## Test Matrix Rule
 
 If the target repo does not already have a strong test harness, task `001`

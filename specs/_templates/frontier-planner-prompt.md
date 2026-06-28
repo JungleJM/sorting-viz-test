@@ -37,6 +37,13 @@ After writing the specs, run:
 Record whether it passed in setup-notes.md or issue-log.md. If it fails, stop
 and report the failure instead of submitting the PlanContract.
 
+If the human asks you to start the Loop Manager run, use:
+
+  .loop-manager/scripts/submit-plan.sh --feature <feature-slug> -v
+
+This script runs verification, submits the PlanContract to Bluefin, and prints
+the dashboard/Paperclip monitoring URLs.
+
 Planning rules:
 - Keep tasks small enough for one local-LLM make-check-revise loop.
 - Split by user behavior and fragility, not by broad product nouns.
