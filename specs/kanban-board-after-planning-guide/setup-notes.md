@@ -74,3 +74,17 @@ Result: passed, running the Loop Manager source tests through `uv`
 - Task 001 uses `max_attempts: 2` so two implementation timeouts stop at
   `needs_human`; at that point, a frontier model should assess whether task 001
   is too broad or ambiguous and propose a narrower split before another run.
+
+## Post-Failure Re-Split
+
+- 2026-06-28: The first local run reached `needs_human` after two attempts on
+  the original scaffold task. The rerun no longer hit the 300-second timeout,
+  but Oracle returned prose instead of a usable file bundle/diff.
+- The original scaffold task was split into:
+  - `001` minimal app shell;
+  - `002` static contract harness;
+  - `003` Kanban task contract skeleton.
+- The remaining behavior tasks were renumbered to `004` through `010`.
+- Developer routing now recommends `oracle/fallback` for each task because the
+  fallback profile is documented as the reliable bounded implementation model,
+  while `oracle/normal` showed protocol noncompliance on this scaffold work.

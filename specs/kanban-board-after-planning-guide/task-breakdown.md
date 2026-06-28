@@ -13,74 +13,138 @@ Each task has one primary behavior outcome and one clear verification path.
 Fragile work such as validation, animation, persistence, date comparison, and
 native drag/drop is isolated or given deterministic rules before implementation.
 
+After the first local run, the original scaffold task failed twice without a
+usable file bundle. The scaffold work is now split into three smaller tasks:
+minimal app shell, static contract harness, and Kanban task-contract skeleton.
+
 ## Test Matrix
 
 | Task | Check command(s) | What the check proves | What proof must cover |
 |------|------------------|-----------------------|------------------------|
-| 001 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 001` | App shell, required sections, project constraints, and task-check harness exist. | Desktop/narrow shell screenshots and terminal check output. |
-| 002 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 002` | State model, default columns/cards, storage key, restore/save hooks, render-from-state flow. | Default board screenshot and reload persistence proof. |
-| 003 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 003` | Column add, inline rename, empty-delete guard, non-empty warning, persistence after column changes. | Add/rename/delete recording and non-empty delete warning. |
-| 004 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 004` | Per-column add-card form, title validation, card schema, priority/due-date rendering, persistence after create. | Add-card workflow, empty-title validation, priority badge screenshot. |
-| 005 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 005` | Description toggle, overdue comparison, warning marker, delete handler, fade-out fallback, stale-ID cleanup. | Expand/delete workflow, overdue styling, deleted-card reload proof. |
-| 006 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 006` | Native drag/drop handlers, stable data attributes, deterministic move rule, Done styling, persistence after drop. | Drag recording, drop-zone highlight, Done styling, reload proof. |
-| 007 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 007` | Search, priority filtering, placeholder gaps, stats formulas, fixed stats bar, live updates after changes. | Filter/stat workflow and fixed stats screenshot. |
-| 008 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --all` | All contracts, accessibility labels, responsive styling, no forbidden APIs/libraries, final proof paths. | Desktop/mobile/final workflow recording. |
+| 001 | `python3 -c "from pathlib import Path; html=Path('index.html').read_text(); assert 'id=\"app\"' in html; assert 'data-board' in html; assert 'data-stats-bar' in html; assert 'fonts.googleapis.com' in html"` | Minimal app shell exists with required root hooks and font. | Desktop/narrow shell screenshots. |
+| 002 | `python3 tests/static_contract_check.py` | Static contract harness exists and checks the shell/project constraints. | Terminal check output and note of enforced contracts. |
+| 003 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 003` | Kanban task-check harness supports task-scoped checks without failing unfinished future work. | Terminal check output and task-check matrix note. |
+| 004 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 004` | State model, default columns/cards, storage key, restore/save hooks, render-from-state flow. | Default board screenshot and reload persistence proof. |
+| 005 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 005` | Column add, inline rename, empty-delete guard, non-empty warning, persistence after column changes. | Add/rename/delete recording and non-empty delete warning. |
+| 006 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 006` | Per-column add-card form, title validation, card schema, priority/due-date rendering, persistence after create. | Add-card workflow, empty-title validation, priority badge screenshot. |
+| 007 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 007` | Description toggle, overdue comparison, warning marker, delete handler, fade-out fallback, stale-ID cleanup. | Expand/delete workflow, overdue styling, deleted-card reload proof. |
+| 008 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 008` | Native drag/drop handlers, stable data attributes, deterministic move rule, Done styling, persistence after drop. | Drag recording, drop-zone highlight, Done styling, reload proof. |
+| 009 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --task 009` | Search, priority filtering, placeholder gaps, stats formulas, fixed stats bar, live updates after changes. | Filter/stat workflow and fixed stats screenshot. |
+| 010 | `python3 tests/static_contract_check.py`; `python3 tests/kanban_contract_check.py --all` | All contracts, accessibility labels, responsive styling, no forbidden APIs/libraries, final proof paths. | Desktop/mobile/final workflow recording. |
 
 ## Behavior-Bundling Review
 
 | Proposal area | Bundling risk | Resulting task split |
 |---------------|---------------|----------------------|
-| Cards | Original card requirement includes form, validation, schema, badges, description toggle, overdue dates, hover delete, animation, and persistence. | Task 004 creates/renders cards; task 005 handles description, overdue, and delete animation. |
-| Drag/drop | Native browser drag/drop is fragile and depends on stable cards, columns, state, and persistence. | Task 006 runs after column and card behavior is complete. |
-| Filtering/statistics | Filtering and stats depend on created/deleted/moved card state. | Task 007 runs after drag/drop and delete behavior. |
-| Visual polish | Styling can hide broken behavior if done too early. | Task 008 is final polish and proof after all behavior exists. |
-| Tests | Later workers need stable contracts before implementation. | Task 001 creates the harness and full task-scoped test matrix. |
+| Scaffolding/tests | The original task combined app shell, static test design, future task matrix, selectors, and proof hooks. A local model returned prose instead of a file bundle twice. | Tasks 001, 002, and 003 split shell, static checker, and Kanban task-check skeleton. |
+| Cards | Original card requirement includes form, validation, schema, badges, description toggle, overdue dates, hover delete, animation, and persistence. | Task 006 creates/renders cards; task 007 handles description, overdue, and delete animation. |
+| Drag/drop | Native browser drag/drop is fragile and depends on stable cards, columns, state, and persistence. | Task 008 runs after column and card behavior is complete. |
+| Filtering/statistics | Filtering and stats depend on created/deleted/moved card state. | Task 009 runs after drag/drop and delete behavior. |
+| Visual polish | Styling can hide broken behavior if done too early. | Task 010 is final polish and proof after all behavior exists. |
 
 ## Fragility Review
 
 | Task | Fragility source | Mitigation in spec/checks/proof |
 |------|------------------|----------------------------------|
-| 001 | Tests could be shallow or overfit to early HTML. | Require real helper assertions, task functions, clear failures, and checks for selectors/hooks used by later proof. |
-| 004 | Form validation and persistence can be partial. | Require empty-title validation, stable schema, and persistence checks after create. |
-| 005 | Date comparison and delete animation are timing-sensitive. | Require local-date comparison rule, visible overdue marker, bounded delete fallback, and reload proof. |
-| 006 | Native drag/drop is browser-fragile. | Require stable `data-*` selectors, deterministic append/drop ordering, cleanup paths, Playwright proof, and persistence proof. |
-| 007 | Filtered DOM can break stats or layout. | Require placeholder class, live stat update hooks, and proof after filtering. |
-| 008 | Responsive and polish can regress behavior. | Run `--all`, require desktop/mobile screenshots, and prohibit new behavior except polish/accessibility fixes. |
+| 001 | App shell can drift from later test selectors. | Require stable root hooks and section markers only; no behavior implementation. |
+| 002 | Static tests can be shallow or too strict. | Require clear failure messages and project-wide checks only. |
+| 003 | Future task checks can fail before behavior exists. | Require future contracts to be explicit but only strict when their task is run. |
+| 006 | Form validation and persistence can be partial. | Require empty-title validation, stable schema, and persistence checks after create. |
+| 007 | Date comparison and delete animation are timing-sensitive. | Require local-date comparison rule, visible overdue marker, bounded delete fallback, and reload proof. |
+| 008 | Native drag/drop is browser-fragile. | Require stable `data-*` selectors, deterministic append/drop ordering, cleanup paths, Playwright proof, and persistence proof. |
+| 009 | Filtered DOM can break stats or layout. | Require placeholder class, live stat update hooks, and proof after filtering. |
+| 010 | Responsive and polish can regress behavior. | Run `--all`, require desktop/mobile screenshots, and prohibit new behavior except polish/accessibility fixes. |
+
+## Model Routing Review
+
+The target Loop Manager runtime exposes model inventory at `/worker-models`.
+Planner-selected developer routing for this plan uses `oracle/fallback` because
+the failed task showed protocol noncompliance from `oracle/normal`, while the
+fallback profile is documented as the proven reliable implementation fallback
+for bounded coding tasks.
+
+| Task | Recommended worker/profile | Why this model fits | Fallback after repeated failure |
+|------|----------------------------|---------------------|----------------------------------|
+| 001 | `oracle/fallback` | Tiny static shell patch; needs instruction following more than deep reasoning. | Frontier re-split if no usable file bundle appears twice. |
+| 002 | `oracle/fallback` | Bounded Python checker file. | Frontier narrows static contracts. |
+| 003 | `oracle/fallback` | Bounded Python checker skeleton. | Frontier separates current smoke checks from future contracts. |
+| 004 | `oracle/fallback` | Bounded state/persistence implementation. | Frontier reviews state-shape ambiguity or model fit. |
+| 005 | `oracle/fallback` | Bounded column workflow. | Frontier splits add/rename/delete if bundled. |
+| 006 | `oracle/fallback` | Bounded card creation/rendering. | Frontier splits validation from rendering/persistence. |
+| 007 | `oracle/fallback` | Fragile date/animation work, but scoped after cards exist. | Frontier splits details, overdue, and delete. |
+| 008 | `oracle/fallback` | Fragile drag/drop isolated after state/cards are stable. | Frontier splits drag feedback from state movement or takes over if allowed. |
+| 009 | `oracle/fallback` | Bounded filtering/stat formulas. | Frontier splits filtering from stats. |
+| 010 | `oracle/fallback` | Polish/proof pass with no new core behavior. | Frontier separates polish defects from proof-artifact defects. |
 
 ## Tasks
 
-### 001 Scaffold Single-File App And Test Harness
+### 001 Minimal App Shell
 
-Create the root `index.html` skeleton and deterministic test harness.
+Create only the root `index.html` skeleton.
 
 Implementation:
 - Create `index.html` with semantic app shell, top toolbar, board region, fixed
-  stats bar placeholders, and inline CSS/JS.
+  stats bar placeholders, and inline CSS/JS placeholders.
+- Add stable selectors/data attributes for app root, toolbar, board, columns
+  region, stats bar, and proof hooks.
 - Add comments or section markers for State, Rendering, Persistence, Column
   Actions, Card Actions, Drag and Drop, Filtering, Statistics, and Utilities.
 - Load Inter from Google Fonts.
+- Do not implement Kanban behavior beyond inert placeholders.
+
+Checks:
+- `python3 -c "from pathlib import Path; html=Path('index.html').read_text(); assert 'id=\"app\"' in html; assert 'data-board' in html; assert 'data-stats-bar' in html; assert 'fonts.googleapis.com' in html"`
+
+Proof:
+- Desktop screenshot of initial shell.
+- Narrow viewport screenshot proving horizontal board region does not break.
+
+### 002 Static Contract Test Harness
+
+Create the project-wide static checker only.
+
+Implementation:
 - Add `tests/static_contract_check.py`.
+- Use only Python standard library modules.
+- Parse `index.html` and fail with clear messages.
+- Enforce single root app target, no external JavaScript libraries, no
+  `prompt()`/`alert()`/`confirm()`, required sections, Inter font, and no writes
+  to `sorting-visualizer/`.
+- Do not add the Kanban task-check file in this task.
+- Do not implement board behavior.
+
+Checks:
+- `python3 tests/static_contract_check.py`
+
+Proof:
+- Terminal proof showing the static check passes.
+- Short note describing what the static check enforces.
+
+### 003 Kanban Task Contract Skeleton
+
+Create the task-scoped Kanban checker without requiring unfinished behavior.
+
+Implementation:
 - Add `tests/kanban_contract_check.py`.
-- Tests must parse `index.html` and fail with clear messages.
-- Static checks must enforce single root app target, no external JavaScript
-  libraries, no `prompt()`/`alert()`/`confirm()`, required sections, Inter font,
-  and no writes to `sorting-visualizer/`.
-- Kanban checks must support `--task 001` through `--task 008` and `--all`,
-  with one function per task.
+- Support `--task 001` through `--task 010` and `--all`.
+- Use one named function per task.
+- Checks for tasks 001 through 003 should pass against the current shell and
+  harness.
+- Future task checks should be explicit enough to guide implementation, but
+  should only become strict when that task is run.
 - Browser behavior that static tests cannot prove should be represented by
   stable selectors, data attributes, storage keys, named handlers, or proof
   requirements.
 
 Checks:
 - `python3 tests/static_contract_check.py`
-- `python3 tests/kanban_contract_check.py --task 001`
+- `python3 tests/kanban_contract_check.py --task 003`
 
 Proof:
-- Desktop screenshot of initial shell.
-- Narrow viewport screenshot proving horizontal board region does not break.
-- Terminal proof showing the task checks pass.
+- Terminal proof showing both checks pass.
+- Short note mapping task numbers to contract functions.
 
-### 002 Board State, Default Data, And Persistence
+### 004 Board State, Default Data, And Persistence
 
 Implement initial state, default columns/cards, localStorage restore/save, and
 state-driven rendering.
@@ -96,13 +160,13 @@ Implementation:
 
 Checks:
 - `python3 tests/static_contract_check.py`
-- `python3 tests/kanban_contract_check.py --task 002`
+- `python3 tests/kanban_contract_check.py --task 004`
 
 Proof:
 - Screenshot of default cards across all four columns.
 - Console-error-free reload proof showing state restored.
 
-### 003 Column Management
+### 005 Column Management
 
 Implement adding, renaming, and deleting empty columns.
 
@@ -118,13 +182,13 @@ Implementation:
 
 Checks:
 - `python3 tests/static_contract_check.py`
-- `python3 tests/kanban_contract_check.py --task 003`
+- `python3 tests/kanban_contract_check.py --task 005`
 
 Proof:
 - Short recording: add a column, rename it, delete it.
 - Screenshot or recording of non-empty column delete prevention.
 
-### 004 Card Creation And Card Rendering
+### 006 Card Creation And Card Rendering
 
 Implement inline card creation and basic card display.
 
@@ -140,18 +204,18 @@ Implementation:
 - Render Low/Medium/High priority badges with distinct colors.
 - Render due date in a consistent metadata area.
 - Render description content collapsed by default, but defer expand/collapse
-  behavior to task 005.
+  behavior to task 007.
 - Provide stable selectors/data attributes for forms and card fields.
 
 Checks:
 - `python3 tests/static_contract_check.py`
-- `python3 tests/kanban_contract_check.py --task 004`
+- `python3 tests/kanban_contract_check.py --task 006`
 
 Proof:
 - Recording: open form, attempt empty save, add valid card, cancel another form.
 - Screenshot of Low/Medium/High priority badges.
 
-### 005 Card Details, Overdue State, And Delete
+### 007 Card Details, Overdue State, And Delete
 
 Implement secondary card behavior after cards can already be created.
 
@@ -168,14 +232,14 @@ Implementation:
 
 Checks:
 - `python3 tests/static_contract_check.py`
-- `python3 tests/kanban_contract_check.py --task 005`
+- `python3 tests/kanban_contract_check.py --task 007`
 
 Proof:
 - Recording: add overdue card with description, expand details, delete a card.
 - Screenshot of overdue styling.
 - Reload proof that the deleted card remains gone.
 
-### 006 Native Drag And Drop
+### 008 Native Drag And Drop
 
 Implement native HTML5 drag/drop movement between columns and Done styling.
 
@@ -193,7 +257,7 @@ Implementation:
 
 Checks:
 - `python3 tests/static_contract_check.py`
-- `python3 tests/kanban_contract_check.py --task 006`
+- `python3 tests/kanban_contract_check.py --task 008`
 
 Proof:
 - Recording: drag a card from `To Do` to `In Progress`, then to `Done`.
@@ -201,7 +265,7 @@ Proof:
 - Screenshot showing Done styling.
 - Reload proof that moved card membership/order persists.
 
-### 007 Search, Priority Filter, And Statistics
+### 009 Search, Priority Filter, And Statistics
 
 Implement filtering and the fixed bottom statistics bar.
 
@@ -217,13 +281,13 @@ Implementation:
 
 Checks:
 - `python3 tests/static_contract_check.py`
-- `python3 tests/kanban_contract_check.py --task 007`
+- `python3 tests/kanban_contract_check.py --task 009`
 
 Proof:
 - Recording: search, apply priority filter, clear filters, observe stats.
 - Screenshot of fixed stats bar after cards are filtered.
 
-### 008 Visual Polish, Responsiveness, Accessibility, And Final Proof
+### 010 Visual Polish, Responsiveness, Accessibility, And Final Proof
 
 Finalize styling, responsive behavior, accessibility labels, and full proof.
 
@@ -250,7 +314,7 @@ Proof:
 
 ## Human-Test Checkpoint
 
-Stop for human preview/testing after task 008 passes checks and final proof is
+Stop for human preview/testing after task 010 passes checks and final proof is
 recorded.
 
 ## Re-Splitting Triggers
@@ -258,8 +322,9 @@ recorded.
 Manager should stop and re-split if:
 
 - a task fails twice for the same behavior;
+- a local worker returns no usable patch or file bundle twice;
 - a local worker weakens checks or removes proof hooks;
 - native drag/drop cannot be made deterministic;
 - proof cannot be captured without changing the product behavior;
-- task 004 or 005 expands into unrelated card features;
-- task 008 introduces new behavior instead of polish/accessibility only.
+- task 006 or 007 expands into unrelated card features;
+- task 010 introduces new behavior instead of polish/accessibility only.

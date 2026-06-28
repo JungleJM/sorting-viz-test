@@ -11,11 +11,17 @@ proof gaps, and human decisions.
 
 - Use the root `index.html` for the Kanban build and leave
   `sorting-visualizer/` untouched.
+- After the first local scaffold run failed twice without a usable file bundle,
+  split the original scaffold/test task into minimal shell, static harness, and
+  Kanban contract skeleton tasks.
 - Split card work into creation/rendering and secondary details/delete behavior
   to avoid bundling form validation, persistence, animation, and deletion into
   one local-LLM task.
 - Isolate native drag/drop after cards and column behavior are stable.
-- Make task `001` own the test harness and the full task-scoped test matrix.
+- Make tasks `001` through `003` establish the shell and test matrix in smaller
+  local-model-safe steps.
+- Recommend `oracle/fallback` for developer routing unless a later frontier
+  reassessment chooses a different available profile.
 - Use Playwright for browser workflow proof and terminal/asciinema proof for
   command execution.
 

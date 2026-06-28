@@ -9,71 +9,86 @@ planner:
   machine: local
   notes: >
     Replanned from kanban.md using the active Loop Manager spec-planning guide.
-    Includes a test matrix, behavior-bundling review, and fragility review.
+    After local task 001 failed twice without a usable file bundle, the scaffold
+    work was split into smaller app-shell and test-harness tasks. The plan now
+    includes worker/model routing recommendations and fallback policies.
 tasks:
-  - task_id: kanban-guide-001-scaffold-tests
-    title: Scaffold single-file app and test harness
+  - task_id: kanban-guide-001-app-shell
+    title: Minimal app shell
     repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
-    branch_name: task/kanban-board-after-planning-guide-001-scaffold-tests
-    goal: Create the root index.html app shell and deterministic task-scoped test harness without implementing full Kanban behavior.
+    branch_name: task/kanban-board-after-planning-guide-001-app-shell
+    goal: Create only the root index.html Kanban app shell without the full test harness or behavior implementation.
     acceptance_criteria:
-      - Root index.html exists with app shell, toolbar, board region, stats bar, and inline CSS/JS sections.
+      - Root index.html exists with semantic app shell, top toolbar, board region, fixed stats bar placeholders, and inline CSS/JS placeholders.
+      - The shell includes stable selectors or data attributes for app root, toolbar, board, columns region, stats bar, and proof hooks.
       - Inter is loaded from Google Fonts.
-      - Root tests/static_contract_check.py exists and enforces project-wide constraints.
-      - Root tests/kanban_contract_check.py exists and supports --task 001 through --task 008 plus --all.
-      - Tests are deterministic, Python-standard-library only, and fail with clear contract messages.
+      - The file includes clear section markers for State, Rendering, Persistence, Column Actions, Card Actions, Drag and Drop, Filtering, Statistics, and Utilities.
+      - No Kanban behavior beyond inert placeholders is implemented in this task.
     checks:
-      - python3 tests/static_contract_check.py
-      - python3 tests/kanban_contract_check.py --task 001
+      - python3 -c "from pathlib import Path; html=Path('index.html').read_text(); assert 'id=\"app\"' in html; assert 'data-board' in html; assert 'data-stats-bar' in html; assert 'fonts.googleapis.com' in html"
     allowed_paths:
       - index.html
-      - tests/**
       - specs/kanban-board-after-planning-guide/**
     forbidden_paths:
       - sorting-visualizer/**
+      - tests/**
+    recommended_worker: oracle
+    recommended_model_profile: fallback
+    fallback_policy: >
+      If this small shell task fails twice or returns no usable file bundle,
+      stop and return the failure artifact to frontier planning; do not retry
+      the broader scaffold task.
     max_attempts: 2
     human_review_required: true
     risk_flags:
       - no_auto_merge_to_main
+      - scaffold-resplit-after-local-failure
 
-  - task_id: kanban-guide-002-state-persistence
-    title: Board state, default data, and persistence
+  - task_id: kanban-guide-002-static-contract-harness
+    title: Static contract test harness
     repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
-    branch_name: task/kanban-board-after-planning-guide-002-state-persistence
-    goal: Implement default columns, example cards, state rendering, and localStorage persistence.
+    branch_name: task/kanban-board-after-planning-guide-002-static-contract-harness
+    goal: Add the project-wide static contract checker for the existing app shell without adding Kanban behavior.
     acceptance_criteria:
-      - Four default columns render from state.
-      - Example cards appear across all four columns when localStorage is empty.
-      - Full board state restores from one documented localStorage key on load.
-      - State is saved after every state-changing action introduced in this task.
+      - Root tests/static_contract_check.py exists and uses only the Python standard library.
+      - Static checks parse index.html and fail with clear messages naming the missing contract.
+      - Static checks enforce app root, toolbar, board region, stats bar, Inter font, required section markers, no external JavaScript libraries, no prompt/alert/confirm, and no writes to sorting-visualizer/.
+      - Static checks pass against the minimal shell from task 001.
+      - This task does not create tests/kanban_contract_check.py and does not implement board behavior.
     checks:
       - python3 tests/static_contract_check.py
-      - python3 tests/kanban_contract_check.py --task 002
     allowed_paths:
       - index.html
-      - tests/**
+      - tests/static_contract_check.py
       - specs/kanban-board-after-planning-guide/**
     forbidden_paths:
       - sorting-visualizer/**
-    max_attempts: 3
+      - tests/kanban_contract_check.py
+    recommended_worker: oracle
+    recommended_model_profile: fallback
+    fallback_policy: >
+      If the checker is too broad or brittle after two failures, return the
+      failure artifact to frontier planning to narrow the static contracts.
+    max_attempts: 2
     human_review_required: true
     risk_flags:
       - no_auto_merge_to_main
+      - test-harness-task
 
-  - task_id: kanban-guide-003-columns
-    title: Column management
+  - task_id: kanban-guide-003-kanban-contract-skeleton
+    title: Kanban task contract skeleton
     repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
-    branch_name: task/kanban-board-after-planning-guide-003-columns
-    goal: Implement adding, renaming, and deleting empty columns with persistence and non-empty delete prevention.
+    branch_name: task/kanban-board-after-planning-guide-003-kanban-contract-skeleton
+    goal: Add the task-scoped Kanban contract checker skeleton without requiring unfinished future behavior.
     acceptance_criteria:
-      - End-of-board add column control creates a custom column with a stable ID.
-      - Double-clicking a column header opens an inline rename control.
-      - Empty columns can be deleted with a hover/focus-visible trash control.
-      - Non-empty columns cannot be deleted and show a non-blocking message.
-      - Column changes save to localStorage.
+      - Root tests/kanban_contract_check.py exists and uses only the Python standard library.
+      - The checker supports --task 001 through --task 010 plus --all.
+      - The checker has one named function per task and clear failure messages.
+      - Checks for tasks 001 through 003 pass against the current shell and harness.
+      - Future task checks are represented as explicit contracts that only become strict when their task is run; unfinished later behavior must not fail task 003.
     checks:
       - python3 tests/static_contract_check.py
       - python3 tests/kanban_contract_check.py --task 003
@@ -83,24 +98,29 @@ tasks:
       - specs/kanban-board-after-planning-guide/**
     forbidden_paths:
       - sorting-visualizer/**
-    max_attempts: 3
+    recommended_worker: oracle
+    recommended_model_profile: fallback
+    fallback_policy: >
+      If the task-contract skeleton fails twice because it is too ambitious,
+      return to frontier planning and split future-task contracts from current
+      passing smoke checks.
+    max_attempts: 2
     human_review_required: true
     risk_flags:
       - no_auto_merge_to_main
+      - test-harness-task
 
-  - task_id: kanban-guide-004-card-create-render
-    title: Card creation and card rendering
+  - task_id: kanban-guide-004-state-persistence
+    title: Board state, default data, and persistence
     repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
-    branch_name: task/kanban-board-after-planning-guide-004-card-create-render
-    goal: Implement inline card creation, validation, basic rendering, and persistence after create.
+    branch_name: task/kanban-board-after-planning-guide-004-state-persistence
+    goal: Implement default columns, example cards, state rendering, and localStorage persistence.
     acceptance_criteria:
-      - Each column has an inline add-card form with title, priority, due date, description, Save, and Cancel.
-      - Empty titles are rejected with a visible inline message and the form remains open.
-      - Successful creates add stable card records to state and save localStorage.
-      - Priority badges are visually distinct for Low, Medium, and High.
-      - Due dates render in a consistent card metadata area.
-      - Description content renders collapsed by default; expand/collapse behavior is deferred to task 005.
+      - Four default columns render from state.
+      - Example cards appear across all four columns when localStorage is empty.
+      - Full board state restores from one documented localStorage key on load.
+      - State is saved after every state-changing action introduced in this task.
     checks:
       - python3 tests/static_contract_check.py
       - python3 tests/kanban_contract_check.py --task 004
@@ -110,23 +130,28 @@ tasks:
       - specs/kanban-board-after-planning-guide/**
     forbidden_paths:
       - sorting-visualizer/**
+    recommended_worker: oracle
+    recommended_model_profile: fallback
+    fallback_policy: >
+      After two repeated failures, frontier planning should decide whether the
+      issue is state shape ambiguity, localStorage fragility, or model fit.
     max_attempts: 3
     human_review_required: true
     risk_flags:
       - no_auto_merge_to_main
 
-  - task_id: kanban-guide-005-card-details-delete
-    title: Card details, overdue state, and delete
+  - task_id: kanban-guide-005-columns
+    title: Column management
     repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
-    branch_name: task/kanban-board-after-planning-guide-005-card-details-delete
-    goal: Implement card description toggles, overdue styling, and persisted card deletion with bounded animation fallback.
+    branch_name: task/kanban-board-after-planning-guide-005-columns
+    goal: Implement adding, renaming, and deleting empty columns with persistence and non-empty delete prevention.
     acceptance_criteria:
-      - Optional descriptions expand and collapse with accessible keyboard-reachable controls.
-      - Overdue due dates use date-only local comparison and are visibly marked in red with a warning marker.
-      - Hover/focus-visible delete removes a card with a fade-out animation.
-      - Delete updates state, removes stale card references from column ordering, and saves localStorage.
-      - Delete animation has a bounded fallback so card removal cannot hang.
+      - End-of-board add column control creates a custom column with a stable ID.
+      - Double-clicking a column header opens an inline rename control.
+      - Empty columns can be deleted with a hover/focus-visible trash control.
+      - Non-empty columns cannot be deleted and show a non-blocking message.
+      - Column changes save to localStorage.
     checks:
       - python3 tests/static_contract_check.py
       - python3 tests/kanban_contract_check.py --task 005
@@ -136,17 +161,85 @@ tasks:
       - specs/kanban-board-after-planning-guide/**
     forbidden_paths:
       - sorting-visualizer/**
+    recommended_worker: oracle
+    recommended_model_profile: fallback
+    fallback_policy: >
+      After two repeated failures, frontier planning should split add, rename,
+      and delete if the local model bundles or weakens behavior.
+    max_attempts: 3
+    human_review_required: true
+    risk_flags:
+      - no_auto_merge_to_main
+
+  - task_id: kanban-guide-006-card-create-render
+    title: Card creation and card rendering
+    repo_url: /var/home/j/code/sorting-viz-test
+    base_branch: feature/kanban-board-after-planning-guide
+    branch_name: task/kanban-board-after-planning-guide-006-card-create-render
+    goal: Implement inline card creation, validation, basic rendering, and persistence after create.
+    acceptance_criteria:
+      - Each column has an inline add-card form with title, priority, due date, description, Save, and Cancel.
+      - Empty titles are rejected with a visible inline message and the form remains open.
+      - Successful creates add stable card records to state and save localStorage.
+      - Priority badges are visually distinct for Low, Medium, and High.
+      - Due dates render in a consistent card metadata area.
+      - Description content renders collapsed by default; expand/collapse behavior is deferred to task 007.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/kanban_contract_check.py --task 006
+    allowed_paths:
+      - index.html
+      - tests/**
+      - specs/kanban-board-after-planning-guide/**
+    forbidden_paths:
+      - sorting-visualizer/**
+    recommended_worker: oracle
+    recommended_model_profile: fallback
+    fallback_policy: >
+      After two repeated failures, frontier planning should split form
+      validation from card rendering/persistence.
+    max_attempts: 3
+    human_review_required: true
+    risk_flags:
+      - no_auto_merge_to_main
+
+  - task_id: kanban-guide-007-card-details-delete
+    title: Card details, overdue state, and delete
+    repo_url: /var/home/j/code/sorting-viz-test
+    base_branch: feature/kanban-board-after-planning-guide
+    branch_name: task/kanban-board-after-planning-guide-007-card-details-delete
+    goal: Implement card description toggles, overdue styling, and persisted card deletion with bounded animation fallback.
+    acceptance_criteria:
+      - Optional descriptions expand and collapse with accessible keyboard-reachable controls.
+      - Overdue due dates use date-only local comparison and are visibly marked in red with a warning marker.
+      - Hover/focus-visible delete removes a card with a fade-out animation.
+      - Delete updates state, removes stale card references from column ordering, and saves localStorage.
+      - Delete animation has a bounded fallback so card removal cannot hang.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/kanban_contract_check.py --task 007
+    allowed_paths:
+      - index.html
+      - tests/**
+      - specs/kanban-board-after-planning-guide/**
+    forbidden_paths:
+      - sorting-visualizer/**
+    recommended_worker: oracle
+    recommended_model_profile: fallback
+    fallback_policy: >
+      After two repeated failures, frontier planning should split description
+      toggles, overdue comparison, and delete animation.
     max_attempts: 3
     human_review_required: true
     risk_flags:
       - no_auto_merge_to_main
       - fragile-date-and-animation
 
-  - task_id: kanban-guide-006-drag-drop
+  - task_id: kanban-guide-008-drag-drop
     title: Native drag and drop
     repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
-    branch_name: task/kanban-board-after-planning-guide-006-drag-drop
+    branch_name: task/kanban-board-after-planning-guide-008-drag-drop
     goal: Implement native HTML5 card dragging between columns, deterministic append ordering, Done styling, and persistence after drop.
     acceptance_criteria:
       - Cards use native HTML5 drag and drop with stable card/column data attributes.
@@ -157,24 +250,30 @@ tasks:
       - Column membership and order persist after reload.
     checks:
       - python3 tests/static_contract_check.py
-      - python3 tests/kanban_contract_check.py --task 006
+      - python3 tests/kanban_contract_check.py --task 008
     allowed_paths:
       - index.html
       - tests/**
       - specs/kanban-board-after-planning-guide/**
     forbidden_paths:
       - sorting-visualizer/**
+    recommended_worker: oracle
+    recommended_model_profile: fallback
+    fallback_policy: >
+      Native drag/drop is fragile. After two repeated failures, frontier
+      planning should either split visual drag feedback from state movement or
+      route the task to frontier implementation if that fallback is allowed.
     max_attempts: 3
     human_review_required: true
     risk_flags:
       - no_auto_merge_to_main
       - fragile-native-drag-drop
 
-  - task_id: kanban-guide-007-filter-stats
+  - task_id: kanban-guide-009-filter-stats
     title: Search, priority filter, and statistics
     repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
-    branch_name: task/kanban-board-after-planning-guide-007-filter-stats
+    branch_name: task/kanban-board-after-planning-guide-009-filter-stats
     goal: Implement real-time filtering, placeholder gaps, and fixed bottom statistics.
     acceptance_criteria:
       - Search filters cards by title case-insensitively.
@@ -184,23 +283,28 @@ tasks:
       - Stats update live after card moves, creates, deletes, and filters.
     checks:
       - python3 tests/static_contract_check.py
-      - python3 tests/kanban_contract_check.py --task 007
+      - python3 tests/kanban_contract_check.py --task 009
     allowed_paths:
       - index.html
       - tests/**
       - specs/kanban-board-after-planning-guide/**
     forbidden_paths:
       - sorting-visualizer/**
+    recommended_worker: oracle
+    recommended_model_profile: fallback
+    fallback_policy: >
+      After two repeated failures, frontier planning should split filtering
+      from statistics.
     max_attempts: 3
     human_review_required: true
     risk_flags:
       - no_auto_merge_to_main
 
-  - task_id: kanban-guide-008-polish-proof
+  - task_id: kanban-guide-010-polish-proof
     title: Visual polish, responsiveness, accessibility, and final proof
     repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
-    branch_name: task/kanban-board-after-planning-guide-008-polish-proof
+    branch_name: task/kanban-board-after-planning-guide-010-polish-proof
     goal: Finish visual quality, responsiveness, accessibility labels, and final proof artifacts without introducing new core behavior.
     acceptance_criteria:
       - Dark glassmorphism interface is polished and responsive.
@@ -218,6 +322,11 @@ tasks:
       - specs/kanban-board-after-planning-guide/**
     forbidden_paths:
       - sorting-visualizer/**
+    recommended_worker: oracle
+    recommended_model_profile: fallback
+    fallback_policy: >
+      After two repeated failures, frontier planning should distinguish polish
+      regressions from missing proof artifacts and split accordingly.
     max_attempts: 3
     human_review_required: true
     risk_flags:
