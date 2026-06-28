@@ -1,0 +1,225 @@
+plan_id: kanban-board-after-planning-guide
+title: Kanban Board with Drag and Drop
+repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+base_branch: feature/kanban-board-after-planning-guide
+summary: Build a single-file vanilla JavaScript Kanban board with editable columns, cards, drag/drop, filtering, persistence, statistics, task-scoped checks, and browser proof artifacts.
+planner:
+  provider: codex
+  model: frontier
+  machine: local
+  notes: >
+    Replanned from kanban.md using the active Loop Manager spec-planning guide.
+    Includes a test matrix, behavior-bundling review, and fragility review.
+tasks:
+  - task_id: kanban-guide-001-scaffold-tests
+    title: Scaffold single-file app and test harness
+    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    base_branch: feature/kanban-board-after-planning-guide
+    branch_name: task/kanban-board-after-planning-guide-001-scaffold-tests
+    goal: Create the root index.html app shell and deterministic task-scoped test harness without implementing full Kanban behavior.
+    acceptance_criteria:
+      - Root index.html exists with app shell, toolbar, board region, stats bar, and inline CSS/JS sections.
+      - Inter is loaded from Google Fonts.
+      - Root tests/static_contract_check.py exists and enforces project-wide constraints.
+      - Root tests/kanban_contract_check.py exists and supports --task 001 through --task 008 plus --all.
+      - Tests are deterministic, Python-standard-library only, and fail with clear contract messages.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/kanban_contract_check.py --task 001
+    allowed_paths:
+      - index.html
+      - tests/**
+      - specs/kanban-board-after-planning-guide/**
+    forbidden_paths:
+      - sorting-visualizer/**
+    max_attempts: 3
+    human_review_required: true
+    risk_flags:
+      - no_auto_merge_to_main
+
+  - task_id: kanban-guide-002-state-persistence
+    title: Board state, default data, and persistence
+    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    base_branch: feature/kanban-board-after-planning-guide
+    branch_name: task/kanban-board-after-planning-guide-002-state-persistence
+    goal: Implement default columns, example cards, state rendering, and localStorage persistence.
+    acceptance_criteria:
+      - Four default columns render from state.
+      - Example cards appear across all four columns when localStorage is empty.
+      - Full board state restores from one documented localStorage key on load.
+      - State is saved after every state-changing action introduced in this task.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/kanban_contract_check.py --task 002
+    allowed_paths:
+      - index.html
+      - tests/**
+      - specs/kanban-board-after-planning-guide/**
+    forbidden_paths:
+      - sorting-visualizer/**
+    max_attempts: 3
+    human_review_required: true
+    risk_flags:
+      - no_auto_merge_to_main
+
+  - task_id: kanban-guide-003-columns
+    title: Column management
+    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    base_branch: feature/kanban-board-after-planning-guide
+    branch_name: task/kanban-board-after-planning-guide-003-columns
+    goal: Implement adding, renaming, and deleting empty columns with persistence and non-empty delete prevention.
+    acceptance_criteria:
+      - End-of-board add column control creates a custom column with a stable ID.
+      - Double-clicking a column header opens an inline rename control.
+      - Empty columns can be deleted with a hover/focus-visible trash control.
+      - Non-empty columns cannot be deleted and show a non-blocking message.
+      - Column changes save to localStorage.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/kanban_contract_check.py --task 003
+    allowed_paths:
+      - index.html
+      - tests/**
+      - specs/kanban-board-after-planning-guide/**
+    forbidden_paths:
+      - sorting-visualizer/**
+    max_attempts: 3
+    human_review_required: true
+    risk_flags:
+      - no_auto_merge_to_main
+
+  - task_id: kanban-guide-004-card-create-render
+    title: Card creation and card rendering
+    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    base_branch: feature/kanban-board-after-planning-guide
+    branch_name: task/kanban-board-after-planning-guide-004-card-create-render
+    goal: Implement inline card creation, validation, basic rendering, and persistence after create.
+    acceptance_criteria:
+      - Each column has an inline add-card form with title, priority, due date, description, Save, and Cancel.
+      - Empty titles are rejected with a visible inline message and the form remains open.
+      - Successful creates add stable card records to state and save localStorage.
+      - Priority badges are visually distinct for Low, Medium, and High.
+      - Due dates render in a consistent card metadata area.
+      - Description content renders collapsed by default; expand/collapse behavior is deferred to task 005.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/kanban_contract_check.py --task 004
+    allowed_paths:
+      - index.html
+      - tests/**
+      - specs/kanban-board-after-planning-guide/**
+    forbidden_paths:
+      - sorting-visualizer/**
+    max_attempts: 3
+    human_review_required: true
+    risk_flags:
+      - no_auto_merge_to_main
+
+  - task_id: kanban-guide-005-card-details-delete
+    title: Card details, overdue state, and delete
+    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    base_branch: feature/kanban-board-after-planning-guide
+    branch_name: task/kanban-board-after-planning-guide-005-card-details-delete
+    goal: Implement card description toggles, overdue styling, and persisted card deletion with bounded animation fallback.
+    acceptance_criteria:
+      - Optional descriptions expand and collapse with accessible keyboard-reachable controls.
+      - Overdue due dates use date-only local comparison and are visibly marked in red with a warning marker.
+      - Hover/focus-visible delete removes a card with a fade-out animation.
+      - Delete updates state, removes stale card references from column ordering, and saves localStorage.
+      - Delete animation has a bounded fallback so card removal cannot hang.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/kanban_contract_check.py --task 005
+    allowed_paths:
+      - index.html
+      - tests/**
+      - specs/kanban-board-after-planning-guide/**
+    forbidden_paths:
+      - sorting-visualizer/**
+    max_attempts: 3
+    human_review_required: true
+    risk_flags:
+      - no_auto_merge_to_main
+      - fragile-date-and-animation
+
+  - task_id: kanban-guide-006-drag-drop
+    title: Native drag and drop
+    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    base_branch: feature/kanban-board-after-planning-guide
+    branch_name: task/kanban-board-after-planning-guide-006-drag-drop
+    goal: Implement native HTML5 card dragging between columns, deterministic append ordering, Done styling, and persistence after drop.
+    acceptance_criteria:
+      - Cards use native HTML5 drag and drop with stable card/column data attributes.
+      - Target columns highlight while dragging.
+      - Dropping into empty and populated columns appends the card to the destination column.
+      - Moving to Done applies muted styling and strikethrough title; moving out removes that styling.
+      - Drag state is cleaned up after successful, cancelled, and invalid drops.
+      - Column membership and order persist after reload.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/kanban_contract_check.py --task 006
+    allowed_paths:
+      - index.html
+      - tests/**
+      - specs/kanban-board-after-planning-guide/**
+    forbidden_paths:
+      - sorting-visualizer/**
+    max_attempts: 3
+    human_review_required: true
+    risk_flags:
+      - no_auto_merge_to_main
+      - fragile-native-drag-drop
+
+  - task_id: kanban-guide-007-filter-stats
+    title: Search, priority filter, and statistics
+    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    base_branch: feature/kanban-board-after-planning-guide
+    branch_name: task/kanban-board-after-planning-guide-007-filter-stats
+    goal: Implement real-time filtering, placeholder gaps, and fixed bottom statistics.
+    acceptance_criteria:
+      - Search filters cards by title case-insensitively.
+      - Priority dropdown supports All, Low, Medium, and High.
+      - Hidden filtered cards preserve placeholder space.
+      - Fixed bottom stats show total, overdue, done, and completion rate with zero-card handling.
+      - Stats update live after card moves, creates, deletes, and filters.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/kanban_contract_check.py --task 007
+    allowed_paths:
+      - index.html
+      - tests/**
+      - specs/kanban-board-after-planning-guide/**
+    forbidden_paths:
+      - sorting-visualizer/**
+    max_attempts: 3
+    human_review_required: true
+    risk_flags:
+      - no_auto_merge_to_main
+
+  - task_id: kanban-guide-008-polish-proof
+    title: Visual polish, responsiveness, accessibility, and final proof
+    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    base_branch: feature/kanban-board-after-planning-guide
+    branch_name: task/kanban-board-after-planning-guide-008-polish-proof
+    goal: Finish visual quality, responsiveness, accessibility labels, and final proof artifacts without introducing new core behavior.
+    acceptance_criteria:
+      - Dark glassmorphism interface is polished and responsive.
+      - Board scrolls horizontally on small screens without breaking layout.
+      - Transitions are smooth for card hover, drag opacity, drop pulse, and delete fade-out.
+      - Icon-only controls have accessible labels or titles.
+      - No browser prompt/alert/confirm usage and no external JavaScript libraries.
+      - Final all-task contract checks pass and required proof artifacts exist under specs/kanban-board-after-planning-guide/proof/feature-final/.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/kanban_contract_check.py --all
+    allowed_paths:
+      - index.html
+      - tests/**
+      - specs/kanban-board-after-planning-guide/**
+    forbidden_paths:
+      - sorting-visualizer/**
+    max_attempts: 3
+    human_review_required: true
+    risk_flags:
+      - no_auto_merge_to_main
+      - final-human-review-required

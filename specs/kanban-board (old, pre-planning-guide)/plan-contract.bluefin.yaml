@@ -20,6 +20,8 @@ tasks:
       - Inter is loaded from Google Fonts.
       - Root tests/static_contract_check.py exists.
       - Root tests/kanban_contract_check.py exists and supports --task 001 and --all.
+      - Static checks enforce single-file, no external JavaScript libraries, no prompt/alert/confirm workflows, required sections, and no sorting-visualizer writes.
+      - Kanban contract checks are deterministic, task-scoped, and use only Python standard library.
     checks:
       - python3 tests/static_contract_check.py
       - python3 tests/kanban_contract_check.py --task 001
@@ -84,19 +86,20 @@ tasks:
     risk_flags:
       - no_auto_merge_to_main
 
-  - task_id: kanban-004-cards
-    title: Card creation, details, priority, due date, and delete
+  - task_id: kanban-004-card-create-render
+    title: Card creation and card rendering
     repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
     base_branch: feature/kanban-board
-    branch_name: task/kanban-board-004-cards
-    goal: Implement inline card creation and full card display behavior.
+    branch_name: task/kanban-board-004-card-create-render
+    goal: Implement inline card creation, validation, persistence, and basic card display.
     acceptance_criteria:
       - Each column has an inline add-card form with title, priority, due date, description, Save, and Cancel.
       - No browser prompt() is used.
+      - Empty titles are rejected with a visible inline message and the form remains open.
+      - Successful creates add stable card records to state and save localStorage.
       - Priority badges are visually distinct.
-      - Optional descriptions are collapsible.
-      - Overdue due dates are visibly marked.
-      - Hover-visible delete removes a card with a fade-out animation.
+      - Due dates render in a consistent card metadata area.
+      - Optional descriptions render collapsed by default; expand/collapse behavior is deferred to task 005.
     checks:
       - python3 tests/static_contract_check.py
       - python3 tests/kanban_contract_check.py --task 004
@@ -111,18 +114,18 @@ tasks:
     risk_flags:
       - no_auto_merge_to_main
 
-  - task_id: kanban-005-drag-drop
-    title: Native drag and drop
+  - task_id: kanban-005-card-details-delete
+    title: Card details, overdue state, and delete
     repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
     base_branch: feature/kanban-board
-    branch_name: task/kanban-board-005-drag-drop
-    goal: Implement native HTML5 card dragging between columns and Done styling.
+    branch_name: task/kanban-board-005-card-details-delete
+    goal: Implement card description toggles, overdue styling, and persisted card deletion.
     acceptance_criteria:
-      - Cards use native HTML5 drag and drop.
-      - Target columns highlight while dragging.
-      - Dropping a card updates column membership and order in state.
-      - Moving to Done applies muted styling and strikethrough title.
-      - Moving out of Done removes Done styling.
+      - Optional descriptions expand and collapse with accessible keyboard-reachable controls.
+      - Overdue due dates are visibly marked in red with a warning icon or clear warning marker.
+      - Hover-visible delete removes a card with a fade-out animation.
+      - Delete updates state, removes stale card references from column ordering, and saves localStorage.
+      - Delete animation has a bounded fallback so card removal cannot hang.
     checks:
       - python3 tests/static_contract_check.py
       - python3 tests/kanban_contract_check.py --task 005
@@ -137,18 +140,20 @@ tasks:
     risk_flags:
       - no_auto_merge_to_main
 
-  - task_id: kanban-006-filter-stats
-    title: Search, priority filter, and statistics
+  - task_id: kanban-006-drag-drop
+    title: Native drag and drop
     repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
     base_branch: feature/kanban-board
-    branch_name: task/kanban-board-006-filter-stats
-    goal: Implement real-time filtering and the fixed statistics bar.
+    branch_name: task/kanban-board-006-drag-drop
+    goal: Implement native HTML5 card dragging between columns and Done styling.
     acceptance_criteria:
-      - Search filters cards by title case-insensitively.
-      - Priority dropdown supports All, Low, Medium, High.
-      - Hidden cards preserve placeholder space.
-      - Fixed bottom stats show total, overdue, done, and completion rate.
-      - Stats update live after card moves, creates, deletes, and filters.
+      - Cards use native HTML5 drag and drop.
+      - Target columns highlight while dragging.
+      - Dropping into empty and populated columns updates column membership and order in state.
+      - Drop ordering is deterministic and documented in code/tests.
+      - Moving to Done applies muted styling and strikethrough title.
+      - Moving out of Done removes Done styling.
+      - Drag state is cleaned up after successful, cancelled, and invalid drops.
     checks:
       - python3 tests/static_contract_check.py
       - python3 tests/kanban_contract_check.py --task 006
@@ -163,11 +168,37 @@ tasks:
     risk_flags:
       - no_auto_merge_to_main
 
-  - task_id: kanban-007-polish-proof
+  - task_id: kanban-007-filter-stats
+    title: Search, priority filter, and statistics
+    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    base_branch: feature/kanban-board
+    branch_name: task/kanban-board-007-filter-stats
+    goal: Implement real-time filtering and the fixed statistics bar.
+    acceptance_criteria:
+      - Search filters cards by title case-insensitively.
+      - Priority dropdown supports All, Low, Medium, High.
+      - Hidden cards preserve placeholder space.
+      - Fixed bottom stats show total, overdue, done, and completion rate.
+      - Stats update live after card moves, creates, deletes, and filters.
+    checks:
+      - python3 tests/static_contract_check.py
+      - python3 tests/kanban_contract_check.py --task 007
+    allowed_paths:
+      - index.html
+      - tests/**
+      - specs/kanban-board/**
+    forbidden_paths:
+      - sorting-visualizer/**
+    max_attempts: 3
+    human_review_required: true
+    risk_flags:
+      - no_auto_merge_to_main
+
+  - task_id: kanban-008-polish-proof
     title: Visual polish, responsiveness, and final proof
     repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
     base_branch: feature/kanban-board
-    branch_name: task/kanban-board-007-polish-proof
+    branch_name: task/kanban-board-008-polish-proof
     goal: Finish visual quality, responsiveness, accessibility, and final proof artifacts.
     acceptance_criteria:
       - Dark glassmorphism interface is polished and responsive.

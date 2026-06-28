@@ -18,15 +18,27 @@ Edit these files for project-specific behavior:
   review task branches rather than receiving file snippets
 
 The installer also creates `specs/_templates/` with reusable feature, task,
-proof, review, readiness, and PlanContract templates. For a production Loop
-Manager run:
+proof, review, readiness, planner-prompt, spec-planning, and PlanContract
+templates. For a production Loop Manager run:
 
 1. Fill in this repo's `.loop-manager/project.yaml`.
 2. Replace placeholder checks in `.loop-manager/checks.yaml` with commands that
    work from a clean checkout.
 3. Set `.loop-manager/preview.yaml` to the real proof mode for the project.
-4. Draft a feature directory under `specs/<feature-slug>/`.
+4. Draft a feature directory under `specs/<feature-slug>/`. Use
+   `specs/_templates/spec-planning-guide.md` before finalizing the task split.
 5. Convert the feature task list into a PlanContract and submit it to Bluefin.
+6. Run `.loop-manager/scripts/verify-spec-planning.sh` at the end of spec
+   making. This runs the Loop Manager source tests through `uv` so template and
+   planning changes are checked before Bluefin receives the spec.
+
+Planner output should include a test matrix, behavior-bundling review, and
+fragility review. If the target repo lacks a strong test harness, the first task
+should normally create one and define task-scoped checks for the planned work.
+
+The final spec-making step should record whether
+`.loop-manager/scripts/verify-spec-planning.sh` passed. If it fails, fix the
+Loop Manager/template issue before submitting the PlanContract.
 
 For real-worker runs, the manager should create and push a task branch before
 developer/reviewer activation. Workers should checkout that branch locally,
@@ -62,7 +74,7 @@ model family; runtime `1.9.1` fails on the embedded Python filesystem codec.
 The preferred loaded API identifier is `qwen3-coder-30b-a3b-instruct`; direct
 MLX remains the fallback if LM Studio cannot keep that model loaded.
 
-For real Gitea task PRs, Loop Manager now runs local PR-Agent review before
+For real Gitea task PRs, Loop Manager runs local PR-Agent review before
 task-branch merge. The task branch merges into the feature branch only after the
 local PR-Agent decision is `approve`.
 

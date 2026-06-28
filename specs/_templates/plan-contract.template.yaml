@@ -1,0 +1,42 @@
+plan_id: replace-with-short-unique-plan-id
+title: Replace with the plan title
+repo_url: https://example.invalid/repo.git
+base_branch: feature/replace-with-feature-slug
+summary: >
+  Replace this with a concise summary of the desired final state.
+planner:
+  provider: frontier
+  model: replace-with-model-or-null
+  machine: replace-with-machine-name
+  notes: >
+    Replace with planner provenance and note whether the task breakdown includes
+    a test matrix, behavior-bundling review, and fragility review.
+tasks:
+  - task_id: replace-with-unique-task-id-001
+    title: Replace with one safe implementation step
+    repo_url: https://example.invalid/repo.git
+    base_branch: feature/replace-with-feature-slug
+    branch_name: task/replace-with-feature-slug-001-replace-with-task-slug
+    goal: >
+      Replace this with one bounded implementation goal. State what should be
+      changed, what should not be changed, and what observable result should
+      exist after the task.
+    acceptance_criteria:
+      - Replace with one observable acceptance criterion.
+      - Replace with one edge case or non-goal that prevents overbuilding.
+    checks:
+      - replace-with-deterministic-check-command
+    allowed_paths:
+      - src/**
+      - tests/**
+      - specs/**
+    forbidden_paths:
+      - .env
+      - .env.*
+      - secrets/**
+      - credentials/**
+      - infrastructure/prod/**
+    max_attempts: 3
+    human_review_required: true
+    risk_flags:
+      - no_auto_merge_to_main
