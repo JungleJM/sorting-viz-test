@@ -39,3 +39,7 @@ with direct MLX as fallback. LM Studio must use MLX runtime `1.8.5` for this
 model family; runtime `1.9.1` fails on the embedded Python filesystem codec.
 The preferred loaded API identifier is `qwen3-coder-30b-a3b-instruct`; direct
 MLX remains the fallback if LM Studio cannot keep that model loaded.
+
+For real Gitea task PRs, Loop Manager now runs local PR-Agent review before
+task-branch merge. The task branch merges into the feature branch only after the
+local PR-Agent decision is `approve`.
