@@ -1,6 +1,6 @@
 plan_id: kanban-board-after-planning-guide
 title: Kanban Board with Drag and Drop
-repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+repo_url: /var/home/j/code/sorting-viz-test
 base_branch: feature/kanban-board-after-planning-guide
 summary: Build a single-file vanilla JavaScript Kanban board with editable columns, cards, drag/drop, filtering, persistence, statistics, task-scoped checks, and browser proof artifacts.
 planner:
@@ -13,7 +13,7 @@ planner:
 tasks:
   - task_id: kanban-guide-001-scaffold-tests
     title: Scaffold single-file app and test harness
-    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
     branch_name: task/kanban-board-after-planning-guide-001-scaffold-tests
     goal: Create the root index.html app shell and deterministic task-scoped test harness without implementing full Kanban behavior.
@@ -39,7 +39,7 @@ tasks:
 
   - task_id: kanban-guide-002-state-persistence
     title: Board state, default data, and persistence
-    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
     branch_name: task/kanban-board-after-planning-guide-002-state-persistence
     goal: Implement default columns, example cards, state rendering, and localStorage persistence.
@@ -64,7 +64,7 @@ tasks:
 
   - task_id: kanban-guide-003-columns
     title: Column management
-    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
     branch_name: task/kanban-board-after-planning-guide-003-columns
     goal: Implement adding, renaming, and deleting empty columns with persistence and non-empty delete prevention.
@@ -90,7 +90,7 @@ tasks:
 
   - task_id: kanban-guide-004-card-create-render
     title: Card creation and card rendering
-    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
     branch_name: task/kanban-board-after-planning-guide-004-card-create-render
     goal: Implement inline card creation, validation, basic rendering, and persistence after create.
@@ -117,7 +117,7 @@ tasks:
 
   - task_id: kanban-guide-005-card-details-delete
     title: Card details, overdue state, and delete
-    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
     branch_name: task/kanban-board-after-planning-guide-005-card-details-delete
     goal: Implement card description toggles, overdue styling, and persisted card deletion with bounded animation fallback.
@@ -144,7 +144,7 @@ tasks:
 
   - task_id: kanban-guide-006-drag-drop
     title: Native drag and drop
-    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
     branch_name: task/kanban-board-after-planning-guide-006-drag-drop
     goal: Implement native HTML5 card dragging between columns, deterministic append ordering, Done styling, and persistence after drop.
@@ -172,7 +172,7 @@ tasks:
 
   - task_id: kanban-guide-007-filter-stats
     title: Search, priority filter, and statistics
-    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
     branch_name: task/kanban-board-after-planning-guide-007-filter-stats
     goal: Implement real-time filtering, placeholder gaps, and fixed bottom statistics.
@@ -198,7 +198,7 @@ tasks:
 
   - task_id: kanban-guide-008-polish-proof
     title: Visual polish, responsiveness, accessibility, and final proof
-    repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
+    repo_url: /var/home/j/code/sorting-viz-test
     base_branch: feature/kanban-board-after-planning-guide
     branch_name: task/kanban-board-after-planning-guide-008-polish-proof
     goal: Finish visual quality, responsiveness, accessibility labels, and final proof artifacts without introducing new core behavior.

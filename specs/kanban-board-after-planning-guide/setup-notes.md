@@ -14,6 +14,15 @@
   comparison spec is run as a separate feature.
 - Task branches should use
   `task/kanban-board-after-planning-guide-<NNN>-<slug>`.
+- In Bluefin live mode, PlanContract `repo_url` should be the allowlisted local
+  checkout path:
+
+```text
+/var/home/j/code/sorting-viz-test
+```
+
+- Remote worker clone/push handoff should continue to use
+  `LOOP_MANAGER_WORKER_REPO_URL` from Bluefin's environment.
 - Developer and code-review nodes should be local LLM workers.
 - Local PR-Agent should run before task-branch merge.
 - Codex PR-Agent should run before task-branch merge when integrated; if it is
