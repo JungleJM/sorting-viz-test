@@ -32,7 +32,7 @@ tasks:
       - specs/kanban-board-after-planning-guide/**
     forbidden_paths:
       - sorting-visualizer/**
-    max_attempts: 3
+    max_attempts: 2
     human_review_required: true
     risk_flags:
       - no_auto_merge_to_main

@@ -66,3 +66,11 @@ After this spec was drafted, the project-local wrapper was run:
 
 Result: passed, running the Loop Manager source tests through `uv`
 (`103 passed, 1 warning`).
+
+## Runtime Adjustment
+
+- 2026-06-28: Oracle implementer timeout should be `900` seconds for this
+  quality-first scaffold run.
+- Task 001 uses `max_attempts: 2` so two implementation timeouts stop at
+  `needs_human`; at that point, a frontier model should assess whether task 001
+  is too broad or ambiguous and propose a narrower split before another run.
