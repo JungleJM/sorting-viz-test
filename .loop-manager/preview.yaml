@@ -13,3 +13,4 @@ proof:
     - short-screen-recording
     - playwright
   not_applicable_requires_reason: true
+  click_visibility_required: true

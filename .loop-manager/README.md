@@ -14,6 +14,28 @@ Edit these files for project-specific behavior:
 - `project.yaml`: repo identity and branch policy
 - `checks.yaml`: build, test, lint, and typecheck commands
 - `preview.yaml`: preview server and proof expectations
+- `project.yaml` branch handoff fields: whether workers must checkout and
+  review task branches rather than receiving file snippets
+
+The installer also creates `specs/_templates/` with reusable feature, task,
+proof, review, readiness, and PlanContract templates. For a production Loop
+Manager run:
+
+1. Fill in this repo's `.loop-manager/project.yaml`.
+2. Replace placeholder checks in `.loop-manager/checks.yaml` with commands that
+   work from a clean checkout.
+3. Set `.loop-manager/preview.yaml` to the real proof mode for the project.
+4. Draft a feature directory under `specs/<feature-slug>/`.
+5. Convert the feature task list into a PlanContract and submit it to Bluefin.
+
+For real-worker runs, the manager should create and push a task branch before
+developer/reviewer activation. Workers should checkout that branch locally,
+perform their implementation or review there, and report branch status back to
+Loop Manager. Diffs may be internal worker artifacts, but the branch is the
+handoff unit.
+
+Runtime worker routing, model selection, Gitea tokens, and Paperclip settings
+belong in the Loop Manager repo and Bluefin environment, not in this target repo.
 
 Proof artifacts should be organized under:
 
@@ -43,3 +65,9 @@ MLX remains the fallback if LM Studio cannot keep that model loaded.
 For real Gitea task PRs, Loop Manager now runs local PR-Agent review before
 task-branch merge. The task branch merges into the feature branch only after the
 local PR-Agent decision is `approve`.
+
+If a task stops at `needs_human`, Loop Manager must create a failure artifact
+summarizing the local attempts, worker results, checks, attempted files, and
+restart guidance. Codex may create that artifact only when deterministic
+artifact creation fails and Codex is explicitly configured as `fallback` for the
+developer or code-review role.

@@ -1,4 +1,4 @@
-project_id: sorting-viz-test
+project_id: kanban-board-test
 repo_url: ssh://git@appliedsci.tail90eacc.ts.net:411/gitea_admin/sorting-viz-test.git
 default_branch: main
 

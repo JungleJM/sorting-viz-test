@@ -2,8 +2,8 @@ checks:
   install: ""
   lint: "python3 tests/static_contract_check.py"
   typecheck: ""
-  test: "python3 tests/algorithm_contract_check.py --all"
-  build: "python3 tests/static_contract_check.py && python3 tests/algorithm_contract_check.py --all"
+  test: "python3 tests/kanban_contract_check.py --all"
+  build: "python3 tests/static_contract_check.py && python3 tests/kanban_contract_check.py --all"
 
 required_for_task_pr:
   - lint
