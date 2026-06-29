@@ -17,7 +17,7 @@ Options:
   --profile ID        Optional Loop Manager profile_id.
   --latest            If multiple plans exist, choose the newest one.
   --skip-verify       Do not run .loop-manager/scripts/verify-spec-planning.sh first.
-  --dry-run           Discover, verify, and parse the plan, but do not POST.
+  --dry-run           Discover, verify, parse, and ask Bluefin for route dry run.
   -v                  Verbose output.
   -vv                 Very verbose output, including response JSON summary.
   -h, --help          Show this help.
@@ -137,6 +137,24 @@ response_summary() {
   '
 }
 
+route_summary() {
+  ruby -rjson -e '
+    data = JSON.parse(STDIN.read)
+    route_plan = data["route_plan"] || {}
+    puts "Runtime route dry run:"
+    Array(route_plan["routes"]).each do |route|
+      label = [route["worker"], route["model_profile"]].compact.join("/")
+      model = route["model"] || "model not resolved"
+      puts "  - #{route["task_id"]}: #{label} -> #{model}"
+    end
+    errors = Array(route_plan["errors"])
+    unless errors.empty?
+      puts "Route errors:"
+      errors.each { |error| puts "  - #{error}" }
+    end
+  '
+}
+
 response_plan_id() {
   ruby -rjson -e 'print JSON.parse(STDIN.read)["plan_id"]'
 }
@@ -236,11 +254,6 @@ log "Dashboard: $dashboard_url"
 log "Paperclip dashboard: $paperclip_dashboard_url"
 log "Paperclip events: $paperclip_events_url"
 
-if [[ "$dry_run" == "true" ]]; then
-  log "Dry run complete. Plan parsed successfully; no POST was sent."
-  exit 0
-fi
-
 log "Checking Loop Manager health: $api_url/health"
 curl -fsS "$api_url/health" >/dev/null
 
@@ -268,6 +281,35 @@ if (( verbosity >= 1 )); then
   ' "$worker_models_file"
 fi
 rm -f "$worker_models_file"
+
+log "Checking runtime route plan: $api_url/plans/dry-run"
+route_response_file="$(mktemp)"
+route_status="$(
+  curl -sS -o "$route_response_file" -w "%{http_code}" \
+    -X POST "$api_url/plans/dry-run" \
+    -H "content-type: application/json" \
+    -d "$payload"
+)"
+if [[ "$route_status" != "200" ]]; then
+  cat "$route_response_file" >&2
+  rm -f "$route_response_file"
+  die "runtime route dry run failed with HTTP $route_status"
+fi
+route_response="$(cat "$route_response_file")"
+rm -f "$route_response_file"
+route_summary <<<"$route_response"
+route_valid="$(
+  ruby -rjson -e 'print JSON.parse(STDIN.read)["valid"] ? "true" : "false"' \
+    <<<"$route_response"
+)"
+if [[ "$route_valid" != "true" ]]; then
+  die "runtime route dry run found invalid worker/model routing"
+fi
+
+if [[ "$dry_run" == "true" ]]; then
+  log "Dry run complete. Plan parsed and runtime routes validated; no execution POST was sent."
+  exit 0
+fi
 
 log "Submitting plan to: $api_url/plans"
 log "Note: current Loop Manager /plans requests are synchronous; this command may stay open until the plan stops or completes."

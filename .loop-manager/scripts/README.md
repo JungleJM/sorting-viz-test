@@ -38,7 +38,8 @@ Rule of thumb:
 
 Useful options:
 
-- `--dry-run`: discover, verify, and parse the plan without posting to Bluefin.
+- `--dry-run`: discover, verify, parse, check `/worker-models`, and POST to
+  `/plans/dry-run` for route validation without executing the plan.
 - `--latest`: if multiple plans exist, choose the newest one.
 - `--skip-verify`: submit without running the spec-planning preflight.
 - `-v`: print selected plan and monitoring URLs.
@@ -51,6 +52,8 @@ Before submission, the script:
 - checks Loop Manager health at `/health`;
 - queries `/worker-models` so the runtime exposes the valid worker/model
   profile names used by frontier-generated PlanContracts.
+- posts to `/plans/dry-run` so the terminal shows the worker/profile/model that
+  will actually run for each task.
 
 After submission, the script prints the Loop Manager dashboard URL, Paperclip
 dashboard URL, Paperclip events URL, and the plan dashboard URL.
